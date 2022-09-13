@@ -35,17 +35,9 @@ jobs:
             pytest test.py
   containerize-backend:
     docker:
-      - image: amazon/aws-cli
+      - image: python:3.7-alpine3.11
     steps:
       - checkout
-      - setup_remote_docker
-      - run:
-          name: Install dependencies
-          command: |
-            yum update -y
-            yum install -y wget
-            yum search docker
-            yum install -y docker
       - run:
           name: Verify Dockerfile
           command: |
@@ -53,6 +45,10 @@ jobs:
             wget -O ./hadolint https://github.com/hadolint/hadolint/releases/download/v1.16.3/hadolint-Linux-x86_64
             chmod +x ./hadolint
             ./hadolint Dockerfile
+      - run:
+          name: Install AWS CLI
+          command: |
+            pip install awscli
       - run:
           name: Containerize backend
           command: |
