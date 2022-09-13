@@ -1,0 +1,12 @@
+Description: DevOps Demo Security
+Parameters:
+  EnvironmentName:
+    Description: Name of the environment
+    Type: String
+Resources:
+  ContainerRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: !Sub "${EnvironmentName}-repository"
+      ImageScanningConfiguration:
+        ScanOnPush: true
