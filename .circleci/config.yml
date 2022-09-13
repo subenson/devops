@@ -9,7 +9,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            cd app/flask
+            cd apps/flask
             python3 -m venv venv
             . venv/bin/activate
             make install
@@ -29,14 +29,14 @@ jobs:
       - run:
           name: Verify Dockerfile
           command: |
-            cd app/flask
+            cd apps/flask
             wget -O /bin/hadolint https://github.com/hadolint/hadolint/releases/download/v1.16.3/hadolint-Linux-x86_64
             chmod +x /bin/hadolint
             hadolint Dockerfile
       - run:
           name: Containerize backend
           command: |
-            cd app/flask
+            cd apps/flask
             make docker-build
       - run:
           name: Docker Login
