@@ -35,9 +35,10 @@ jobs:
             pytest test.py
   containerize-backend:
     docker:
-      - image: docker:20.10-git
+      - image: cimg/base:2022.06
     steps:
       - checkout
+      - setup_docker_remote
       - run:
           name: Verify Dockerfile
           command: |
