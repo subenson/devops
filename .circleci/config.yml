@@ -8,8 +8,8 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - v1-dependencies-{{ checksum "apps/flask/requirements.txt" }}
-            - v1-dependencies-
+            - backend-dependencies-{{ checksum "apps/flask/requirements.txt" }}
+            - backend-dependencies-
       - run:
           name: Install dependencies
           command: |
@@ -20,15 +20,17 @@ jobs:
       - save_cache:
           paths:
             - ./venv
-          key: v1-dependencies-{{ checksum "apps/flask/requirements.txt" }}
+          key: backend-dependencies-{{ checksum "apps/flask/requirements.txt" }}
       - run:
           name: Lint
           command: |
+            cd apps/flask
             . venv/bin/activate
             pylint app.py
       - run:
           name: Unit Test
           command: |
+            cd apps/flask
             . venv/bin/activate
             pytest test.py
   containerize-backend:
