@@ -49,7 +49,7 @@ jobs:
           name: Containerize backend
           command: |
             cd apps/flask
-            make docker-build
+            docker build -t devops-demo-backend .
       - run:
           name: Docker Login
           command: |
