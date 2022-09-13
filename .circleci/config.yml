@@ -42,9 +42,14 @@ jobs:
             ./hadolint Dockerfile
   containerize-backend:
     docker:
-      - image: docker:17.05.0-ce-git
+      - image: docker:20.10.18-git
     steps:
       - checkout
+      - run:
+          name: Install dependencies
+          command: |
+            pip install --upgrade pip
+            pip install aws-cli
       - setup_remote_docker
       - run:
           name: Containerize backend
