@@ -35,7 +35,7 @@ jobs:
             pytest test.py
   containerize-backend:
     docker:
-      - image: cimg/base:2022.06
+      - image: amazon/aws-cli
     steps:
       - checkout
       - setup_remote_docker
@@ -54,7 +54,7 @@ jobs:
       - run:
           name: Docker Login
           command: |
-            aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 720637228989.dkr.ecr.us-east-1.amazonaws.com
+            docker login -u AWS -p $(aws ecr get-login-password --region us-east-1) 720637228989.dkr.ecr.us-east-1.amazonaws.com
       - run:
           name: Tag container
           command: |
