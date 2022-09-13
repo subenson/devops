@@ -33,11 +33,6 @@ jobs:
             cd apps/flask
             . venv/bin/activate
             pytest test.py
-  containerize-backend:
-    docker:
-      - image: cimg/aws
-    steps:
-      - checkout
       - run:
           name: Verify Dockerfile
           command: |
@@ -45,6 +40,12 @@ jobs:
             wget -O ./hadolint https://github.com/hadolint/hadolint/releases/download/v1.16.3/hadolint-Linux-x86_64
             chmod +x ./hadolint
             ./hadolint Dockerfile
+  containerize-backend:
+    docker:
+      - image: docker:17.05.0-ce-git
+    steps:
+      - checkout
+      - setup_remote_docker
       - run:
           name: Containerize backend
           command: |
