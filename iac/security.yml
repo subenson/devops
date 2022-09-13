@@ -1,0 +1,11 @@
+Description: DevOps Demo Security
+Parameters:
+  EnvironmentName:
+    Description: Name of the environment
+    Type: String
+Resources:
+  KeyPair:
+    Type: AWS::EC2::KeyPair
+    Properties:
+      KeyName: !Sub "${EnvironmentName}-Key"
+      KeyType: rsa
