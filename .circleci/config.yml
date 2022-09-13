@@ -35,7 +35,7 @@ jobs:
             pytest test.py
   containerize-backend:
     docker:
-      - image: cimg/python:3.8
+      - image: docker:20.10-git
     steps:
       - checkout
       - run:
