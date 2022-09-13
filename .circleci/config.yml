@@ -35,7 +35,7 @@ jobs:
             pytest test.py
   containerize-backend:
     docker:
-      - image: python:3.7-alpine3.11
+      - image: cimg/aws
     steps:
       - checkout
       - run:
@@ -46,10 +46,6 @@ jobs:
             chmod +x ./hadolint
             ./hadolint Dockerfile
       - run:
-          name: Install AWS CLI
-          command: |
-            pip install awscli
-      - run:
           name: Containerize backend
           command: |
             cd apps/flask
@@ -57,7 +53,8 @@ jobs:
       - run:
           name: Docker Login
           command: |
-            docker login -u AWS -p $(aws ecr get-login-password --region us-east-1) 720637228989.dkr.ecr.us-east-1.amazonaws.com
+            export ECR_PASSWORD=$(aws ecr get-login-password --region us-east-1)
+            docker login -u AWS -p ${ECR_PASSWORD} 720637228989.dkr.ecr.us-east-1.amazonaws.com
       - run:
           name: Tag container
           command: |
