@@ -8,7 +8,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - v1-dependencies-{{ checksum "requirements.txt" }}
+            - v1-dependencies-{{ checksum "apps/flask/requirements.txt" }}
             - v1-dependencies-
       - run:
           name: Install dependencies
@@ -20,7 +20,7 @@ jobs:
       - save_cache:
           paths:
             - ./venv
-          key: v1-dependencies-{{ checksum "requirements.txt" }}
+          key: v1-dependencies-{{ checksum "apps/flask/requirements.txt" }}
       - run:
           name: Lint
           command: |
