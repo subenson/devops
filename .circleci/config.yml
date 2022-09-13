@@ -40,6 +40,11 @@ jobs:
       - checkout
       - setup_remote_docker
       - run:
+          name: Install dependencies
+          command: |
+            yum update -y
+            yum install -y wget
+      - run:
           name: Verify Dockerfile
           command: |
             cd apps/flask
