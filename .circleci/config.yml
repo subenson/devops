@@ -44,6 +44,7 @@ jobs:
           command: |
             yum update -y
             yum install -y wget
+            yum search docker
             yum install -y docker
       - run:
           name: Verify Dockerfile
