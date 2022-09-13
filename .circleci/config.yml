@@ -1,0 +1,59 @@
+version: 2.1
+
+jobs:
+  validate-backend:
+    docker:
+      - image: cimg/python:3.8
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: |
+            cd app/flask
+            python3 -m venv venv
+            . venv/bin/activate
+            make install
+      - run:
+          name: Lint
+          command: |
+            pylint app.py
+      - run:
+          name: Unit Test
+          command: |
+            pytest test.py
+  containerize-backend:
+    docker:
+      - image: cimg/python:3.8
+    steps:
+      - checkout
+      - run:
+          name: Verify Dockerfile
+          command: |
+            cd app/flask
+            wget -O /bin/hadolint https://github.com/hadolint/hadolint/releases/download/v1.16.3/hadolint-Linux-x86_64
+            chmod +x /bin/hadolint
+            hadolint Dockerfile
+      - run:
+          name: Containerize backend
+          command: |
+            cd app/flask
+            make docker-build
+      - run:
+          name: Docker Login
+          command: |
+            aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 720637228989.dkr.ecr.us-east-1.amazonaws.com
+      - run:
+          name: Tag container
+          command: |
+            docker tag devops-demo-backend 720637228989.dkr.ecr.us-east-1.amazonaws.com/devops-demo-repository:v1.0.0
+      - run:
+          name: Push container
+          command: |
+            docker push 720637228989.dkr.ecr.us-east-1.amazonaws.com/devops-demo-repository:v1.0.0
+
+workflows:
+  default:
+    jobs:
+      - validate-backend
+      - containerize-backend:
+          requires: [validate-backend]
