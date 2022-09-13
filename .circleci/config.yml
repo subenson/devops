@@ -16,10 +16,12 @@ jobs:
       - run:
           name: Lint
           command: |
+            . venv/bin/activate
             pylint app.py
       - run:
           name: Unit Test
           command: |
+            . venv/bin/activate
             pytest test.py
   containerize-backend:
     docker:
