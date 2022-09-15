@@ -21,6 +21,7 @@ commands:
       - run:
           name: Get registry URL
           command: |
+            export REGISTRY_ID=$(aws ecr describe-repositories --query "repositories[0].registryId" --output text)
             export REGISTRY_URL=${REGISTRY_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
             echo 'export REGISTRY_URL="${REGISTRY_URL}"' >> "$BASH_ENV"
             source "$BASH_ENV"
