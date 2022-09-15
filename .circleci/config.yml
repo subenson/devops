@@ -10,18 +10,21 @@ commands:
             export REGISTRY_ID=$(aws ecr describe-repositories --query "repositories[0].registryId" --output text)
             echo 'export REGISTRY_ID="${REGISTRY_ID}"' >> "$BASH_ENV"
             source "$BASH_ENV"
+            echo "${REGISTRY_ID}"
       - run:
           name: Get repository name
           command: |
             export REGISTRY_NAME=$(aws ecr describe-repositories --query "repositories[0].repositoryName" --output text)
             echo 'export REGISTRY_NAME="${REGISTRY_NAME}"' >> "$BASH_ENV"
             source "$BASH_ENV"
+            echo "${REGISTRY_ID}"
       - run:
           name: Get registry URL
           command: |
             export REGISTRY_URL=${REGISTRY_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
             echo 'export REGISTRY_URL="${REGISTRY_URL}"' >> "$BASH_ENV"
             source "$BASH_ENV"
+            echo "${REGISTRY_ID}"
 
 jobs:
   upsert-container-registry:
@@ -96,8 +99,9 @@ jobs:
       - run:
           name: Docker Login
           command: |
+            echo "${AWS_REGION}"
             export ECR_PASSWORD=$(aws ecr get-login-password --region ${AWS_REGION})
-            echo ${REGISTRY_URL}
+            echo "${REGISTRY_URL}"
             docker login -u AWS -p ${ECR_PASSWORD} ${REGISTRY_URL}
       - run:
           name: Tag container
