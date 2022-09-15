@@ -101,7 +101,6 @@ jobs:
           command: |
             export ECR_PASSWORD=$(aws ecr get-login-password)
             source $BASH_ENV
-            echo "${REGISTRY_URL}"
             docker login -u AWS -p ${ECR_PASSWORD} ${REGISTRY_URL}
       - run:
           name: Containerize backend
@@ -111,10 +110,12 @@ jobs:
       - run:
           name: Tag container
           command: |
+            source $BASH_ENV
             docker tag devops-demo-backend ${REGISTRY_URL}/${REGISTRY_NAME}:backend-${CIRCLE_WORKFLOW_ID:0:7}
       - run:
           name: Push container
           command: |
+            source $BASH_ENV
             docker push ${REGISTRY_URL}/${REGISTRY_NAME}:backend-${CIRCLE_WORKFLOW_ID:0:7}
 
 workflows:
