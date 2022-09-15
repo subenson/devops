@@ -11,14 +11,20 @@ commands:
             echo 'export REGISTRY_ID="${REGISTRY_ID}"' >> "$BASH_ENV"
             source "$BASH_ENV"
       - run:
-          name: Get registry ID
+          name: Get repository name
           command: |
             export REGISTRY_NAME=$(aws ecr describe-repositories --query "repositories[0].repositoryName" --output text)
             echo 'export REGISTRY_NAME="${REGISTRY_NAME}"' >> "$BASH_ENV"
             source "$BASH_ENV"
+      - run:
+          name: Get registry URL
+          command: |
+            export REGISTRY_URL=${REGISTRY_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
+            echo 'export REGISTRY_URL="${REGISTRY_URL}"' >> "$BASH_ENV"
+            source "$BASH_ENV"
 
 jobs:
-  setup-container-registry:
+  upsert-container-registry:
     docker:
       - image: amazon/aws-cli
     steps:
@@ -90,15 +96,17 @@ jobs:
       - run:
           name: Docker Login
           command: |
-            docker login -u AWS -p ${ECR_PASSWORD} ${REGISTRY_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
+            export ECR_PASSWORD=$(aws ecr get-login-password --region ${AWS_REGION})
+            echo ${REGISTRY_URL}
+            docker login -u AWS -p ${ECR_PASSWORD} ${REGISTRY_URL}
       - run:
           name: Tag container
           command: |
-            docker tag devops-demo-backend ${REGISTRY_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${REGISTRY_NAME}:backend-${CIRCLE_WORKFLOW_ID:0:7}
+            docker tag devops-demo-backend ${REGISTRY_URL}/${REGISTRY_NAME}:backend-${CIRCLE_WORKFLOW_ID:0:7}
       - run:
           name: Push container
           command: |
-            docker push ${REGISTRY_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${REGISTRY_NAME}:backend-${CIRCLE_WORKFLOW_ID:0:7}
+            docker push ${REGISTRY_URL}/${REGISTRY_NAME}:backend-${CIRCLE_WORKFLOW_ID:0:7}
 
 workflows:
   default:
