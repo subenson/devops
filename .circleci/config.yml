@@ -94,8 +94,8 @@ jobs:
             apk add --update python3 py3-pip
             pip install --upgrade pip
             pip install awscli
-      - get-container-registry
       - setup_remote_docker
+      - get-container-registry
       - run:
           name: Docker Login
           command: |
