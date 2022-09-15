@@ -41,6 +41,18 @@ jobs:
               --stack-name DevOpsDemoSecurity \
               --parameter-overrides EnvironmentName="devops-demo" \
               --capabilities "CAPABILITY_NAMED_IAM"
+  upsert-network:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: Setup network
+          command: |
+            aws cloudformation deploy \
+              --template-file iac/network.yml \
+              --stack-name DevOpsDemoNetwork \
+              --parameter-overrides EnvironmentName="devops-demo"
   upsert-container-registry:
     docker:
       - image: amazon/aws-cli
@@ -131,6 +143,7 @@ workflows:
   default:
     jobs:
       - upsert-security
+      - upsert-network
       - upsert-container-registry
       - validate-backend
       - containerize-backend:

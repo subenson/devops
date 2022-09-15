@@ -11,6 +11,8 @@ Resources:
       EnableDnsHostnames: true
       Tags:
         - Key: Name
+          Value: !Sub "${EnvironmentName}-vpc"
+        - Key: Project
           Value: !Ref EnvironmentName
   AZ1PrivateSubnet:
     Type: AWS::EC2::Subnet
@@ -21,7 +23,9 @@ Resources:
       MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
-          Value: !Sub ${EnvironmentName} AZ1 Private Subnet
+          Value: !Sub "${EnvironmentName}-az1-private-subnet"
+        - Key: Project
+          Value: !Ref EnvironmentName
   AZ2PrivateSubnet:
     Type: AWS::EC2::Subnet
     Properties:
@@ -31,4 +35,6 @@ Resources:
       MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
-          Value: !Sub ${EnvironmentName} AZ2 Private Subnet
+          Value: !Sub "${EnvironmentName}-az2-private-subnet"
+        - Key: Project
+          Value: !Ref EnvironmentName
