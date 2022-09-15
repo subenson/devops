@@ -8,14 +8,14 @@ commands:
           name: Get registry ID
           command: |
             export REGISTRY_ID=$(aws ecr describe-repositories --query "repositories[0].registryId" --output text)
-            echo 'export REGISTRY_ID="${REGISTRY_ID}"' >> "$BASH_ENV"
+            echo 'export REGISTRY_ID=${REGISTRY_ID}' >> "$BASH_ENV"
             source "$BASH_ENV"
             echo "${REGISTRY_ID}"
       - run:
           name: Get repository name
           command: |
             export REGISTRY_NAME=$(aws ecr describe-repositories --query "repositories[0].repositoryName" --output text)
-            echo 'export REGISTRY_NAME="${REGISTRY_NAME}"' >> "$BASH_ENV"
+            echo 'export REGISTRY_NAME=${REGISTRY_NAME}' >> "$BASH_ENV"
             source "$BASH_ENV"
             echo "${REGISTRY_NAME}"
       - run:
@@ -23,7 +23,7 @@ commands:
           command: |
             export REGISTRY_ID=$(aws ecr describe-repositories --query "repositories[0].registryId" --output text)
             export REGISTRY_URL=${REGISTRY_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
-            echo 'export REGISTRY_URL="${REGISTRY_URL}"' >> "$BASH_ENV"
+            echo 'export REGISTRY_URL=${REGISTRY_URL}' >> "$BASH_ENV"
             source "$BASH_ENV"
             echo "${REGISTRY_URL}"
       - run:
