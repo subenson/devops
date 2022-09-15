@@ -114,4 +114,4 @@ workflows:
       - upsert-container-registry
       - validate-backend
       - containerize-backend:
-          requires: [validate-backend, setup-container-registry]
+          requires: [validate-backend, upsert-container-registry]
