@@ -111,7 +111,7 @@ jobs:
 workflows:
   default:
     jobs:
-      - setup-container-registry
+      - upsert-container-registry
       - validate-backend
       - containerize-backend:
           requires: [validate-backend, setup-container-registry]
