@@ -26,12 +26,20 @@ commands:
             echo 'export REGISTRY_URL='${REGISTRY_URL} >> "$BASH_ENV"
             source "$BASH_ENV"
             echo "${REGISTRY_URL}"
-      - run:
-          name: List BASH ENV
-          command: |
-            cat $BASH_ENV
 
 jobs:
+  upsert-security:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: Setup security
+          command: |
+            aws cloudformation deploy \
+              --template-file iac/security.yml \
+              --stack-name DevOpsDemoSecurity \
+              --parameter-overrides EnvironmentName="devops-demo"
   upsert-container-registry:
     docker:
       - image: amazon/aws-cli
@@ -121,6 +129,7 @@ jobs:
 workflows:
   default:
     jobs:
+      - upsert-security
       - upsert-container-registry
       - validate-backend
       - containerize-backend:
