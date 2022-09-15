@@ -1,6 +1,35 @@
 version: 2.1
 
+commands:
+  get-container-registry:
+    description: Retrieve REGISTRY_ID and REPOSITORY_NAME from AWS ECR.
+    steps:
+      - run:
+          name: Get registry ID
+          command: |
+            export REGISTRY_ID=$(aws ecr describe-repositories --query "repositories[0].registryId" --output text)
+            echo 'export REGISTRY_ID="${REGISTRY_ID}"' >> "$BASH_ENV"
+            source "$BASH_ENV"
+      - run:
+          name: Get registry ID
+          command: |
+            export REGISTRY_NAME=$(aws ecr describe-repositories --query "repositories[0].repositoryName" --output text)
+            echo 'export REGISTRY_NAME="${REGISTRY_NAME}"' >> "$BASH_ENV"
+            source "$BASH_ENV"
+
 jobs:
+  setup-container-registry:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: Setup container registry
+          command: |
+            aws cloudformation deploy \
+              --template-file iac/container-registry.yml \
+              --stack-name DevOpsDemoContainerRegistry \
+              --parameter-overrides EnvironmentName="devops-demo"
   validate-backend:
     docker:
       - image: cimg/python:3.8
@@ -45,6 +74,7 @@ jobs:
       - image: docker:20.10.18-git
     steps:
       - checkout
+      - get-container-registry
       - run:
           name: Install dependencies
           command: |
@@ -60,20 +90,20 @@ jobs:
       - run:
           name: Docker Login
           command: |
-            export ECR_PASSWORD=$(aws ecr get-login-password --region us-east-1)
-            docker login -u AWS -p ${ECR_PASSWORD} 720637228989.dkr.ecr.us-east-1.amazonaws.com
+            docker login -u AWS -p ${ECR_PASSWORD} ${REGISTRY_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
       - run:
           name: Tag container
           command: |
-            docker tag devops-demo-backend 720637228989.dkr.ecr.us-east-1.amazonaws.com/devops-demo-repository:v1.0.0
+            docker tag devops-demo-backend ${REGISTRY_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${REGISTRY_NAME}:backend-${CIRCLE_WORKFLOW_ID:0:7}
       - run:
           name: Push container
           command: |
-            docker push 720637228989.dkr.ecr.us-east-1.amazonaws.com/devops-demo-repository:v1.0.0
+            docker push ${REGISTRY_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${REGISTRY_NAME}:backend-${CIRCLE_WORKFLOW_ID:0:7}
 
 workflows:
   default:
     jobs:
+      - setup-container-registry
       - validate-backend
       - containerize-backend:
           requires: [validate-backend]

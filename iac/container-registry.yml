@@ -1,4 +1,4 @@
-Description: DevOps Demo Security
+Description: DevOps Demo Container Registry
 Parameters:
   EnvironmentName:
     Description: Name of the environment
