@@ -26,6 +26,10 @@ commands:
             echo 'export REGISTRY_URL="${REGISTRY_URL}"' >> "$BASH_ENV"
             source "$BASH_ENV"
             echo "${REGISTRY_URL}"
+      - run:
+          name: List BASH ENV
+          command: |
+            cat $BASH_ENV
 
 jobs:
   upsert-container-registry:
@@ -93,16 +97,16 @@ jobs:
       - get-container-registry
       - setup_remote_docker
       - run:
-          name: Containerize backend
-          command: |
-            cd apps/flask
-            docker build -t devops-demo-backend .
-      - run:
           name: Docker Login
           command: |
             export ECR_PASSWORD=$(aws ecr get-login-password)
             echo "${REGISTRY_URL}"
             docker login -u AWS -p ${ECR_PASSWORD} ${REGISTRY_URL}
+      - run:
+          name: Containerize backend
+          command: |
+            cd apps/flask
+            docker build -t devops-demo-backend .
       - run:
           name: Tag container
           command: |
