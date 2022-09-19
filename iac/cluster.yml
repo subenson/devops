@@ -69,7 +69,7 @@ Resources:
         SubnetIds:
           Fn::ImportValue:
             !Sub "${EnvironmentName}-private-subnets"
-      RoleARN: !Ref EKSRole
+      RoleARN: !Ref EKSRole.Arn
       Tags:
         - Key: Project
           Value: !Sub "${EnvironmentName}"
