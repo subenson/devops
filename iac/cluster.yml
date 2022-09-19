@@ -4,6 +4,21 @@ Parameters:
     Description: Name of the environment
     Type: String
 Resources:
+  EKSRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${EnvironmentName}-eks-role"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - eks.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
   SecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -54,11 +69,7 @@ Resources:
         SubnetIds:
           Fn::ImportValue:
             !Sub "${EnvironmentName}-private-subnets"
-      RoleARN:
-        Fn::ImportValue:
-          !Sub "${EnvironmentName}-eks-role"
-      Name: !Sub "${EnvironmentName}-cluster"
+      RoleARN: !Ref EKSRole
       Tags:
         - Key: Project
           Value: !Sub "${EnvironmentName}"
-
