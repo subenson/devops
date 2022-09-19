@@ -39,8 +39,7 @@ jobs:
             aws cloudformation deploy \
               --template-file iac/security.yml \
               --stack-name DevOpsDemoSecurity \
-              --parameter-overrides EnvironmentName="devops-demo" \
-              --capabilities "CAPABILITY_NAMED_IAM"
+              --parameter-overrides EnvironmentName="devops-demo"
   upsert-network:
     docker:
       - image: amazon/aws-cli
@@ -149,7 +148,8 @@ jobs:
             aws cloudformation deploy \
               --template-file iac/cluster.yml \
               --stack-name DevOpsDemoCluster \
-              --parameter-overrides EnvironmentName="devops-demo"
+              --parameter-overrides EnvironmentName="devops-demo" \
+              --capabilities "CAPABILITY_NAMED_IAM"
 
 workflows:
   default:
