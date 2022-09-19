@@ -1,0 +1,64 @@
+Description: DevOps Demo Container Registry
+Parameters:
+  EnvironmentName:
+    Description: Name of the environment
+    Type: String
+Resources:
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for Kubernetes traffic
+      GroupName: KubernetesSec
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 10250
+          ToPort: 10250
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 53
+          ToPort: 53
+          CidrIp: 0.0.0.0/0
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 10250
+          ToPort: 10250
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 53
+          ToPort: 53
+          CidrIp: 0.0.0.0/0
+      VpcId:
+        Fn::ImportValue:
+          !Sub "${EnvironmentName}-vpc"
+  Cluster:
+    Type: AWS::EKS::Cluster
+    Properties:
+      ResourcesVpcConfig:
+        SecurityGroupIds: !Join [ ",", [ !Ref SecurityGroup ]]
+        SubnetIds:
+          Fn::ImportValue:
+            !Sub "${EnvironmentName}-private-subnets"
+      RoleARN:
+        Fn::ImportValue:
+          !Sub "${EnvironmentName}-eks-role"
+      Name: !Sub "${EnvironmentName}-cluster"
+      Tags:
+        - Key: Project
+          Value: !Sub "${EnvironmentName}"
+
