@@ -14,7 +14,7 @@ Resources:
           Value: !Sub "${EnvironmentName}-vpc"
         - Key: Project
           Value: !Ref EnvironmentName
-  AZ1PrivateSubnet:
+  PrivateSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
@@ -26,7 +26,7 @@ Resources:
           Value: !Sub "${EnvironmentName}-az1-private-subnet"
         - Key: Project
           Value: !Ref EnvironmentName
-  AZ2PrivateSubnet:
+  PrivateSubnet2:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
@@ -38,3 +38,14 @@ Resources:
           Value: !Sub "${EnvironmentName}-az2-private-subnet"
         - Key: Project
           Value: !Ref EnvironmentName
+Outputs:
+  VPC:
+    Description: A reference to the VPC
+    Value: !Ref VPC
+    Export:
+      Name: !Sub ${EnvironmentName}-vpc
+  PrivateSubnets:
+    Description: A list of the private subnets
+    Value: !Join [ ",", [ !Ref PrivateSubnet1, !Ref PrivateSubnet2 ]]
+    Export:
+      Name: !Sub ${EnvironmentName}-private-subnets
