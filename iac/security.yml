@@ -24,3 +24,10 @@ Resources:
               - 'sts:AssumeRole'
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
+
+Outputs:
+  EKSRole:
+    Description: A reference to the EKS Role
+    Value: !Ref EKSRole
+    Export:
+      Name: !Sub ${EnvironmentName}-eks-role
