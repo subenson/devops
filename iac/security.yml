@@ -9,3 +9,9 @@ Resources:
     Properties:
       KeyName: !Sub "${EnvironmentName}-key"
       KeyType: rsa
+Outputs:
+  Key:
+    Description: A reference to the KeyPair
+    Value: !Ref KeyPair
+    Export:
+      Name: !Sub ${EnvironmentName}-key
