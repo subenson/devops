@@ -137,13 +137,13 @@ jobs:
           command: |
             source $BASH_ENV
             docker push ${REGISTRY_URL}/${REGISTRY_NAME}:backend-${CIRCLE_WORKFLOW_ID:0:7}
-  create-cluster:
+  upsert-cluster:
     docker:
       - image: amazon/aws-cli
     steps:
       - checkout
       - run:
-          name: Create cluster
+          name: Upsert cluster
           command: |
             aws cloudformation deploy \
               --template-file iac/cluster.yml \
@@ -160,5 +160,5 @@ workflows:
       - validate-backend
       - containerize-backend:
           requires: [validate-backend, upsert-container-registry]
-      - create-cluster:
+      - upsert-cluster:
           requires: [upsert-network, containerize-backend]

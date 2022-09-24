@@ -19,6 +19,8 @@ Resources:
               - 'sts:AssumeRole'
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
+        - arn:aws:iam::aws:policy/AmazonEKSServicePolicy
+        - arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess
   SecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -64,13 +66,19 @@ Resources:
   Cluster:
     Type: AWS::EKS::Cluster
     Properties:
+      Name: !Sub "${EnvironmentName}-eks-cluster"
       ResourcesVpcConfig:
-        SecurityGroupIds: !Join [ ",", [ !Ref SecurityGroup ]]
+        SecurityGroupIds:
+          - !Ref SecurityGroup
         SubnetIds:
-          Fn::ImportValue:
-            !Sub "${EnvironmentName}-private-subnets"
-      RoleARN:
-        Fn::GetAtt: EKSRole.Arn
+          - Fn::ImportValue:
+              !Sub "${EnvironmentName}-private-subnet-1"
+          - Fn::ImportValue:
+              !Sub "${EnvironmentName}-private-subnet-2"
+      RoleArn: !GetAtt EKSRole.Arn
       Tags:
         - Key: Project
           Value: !Sub "${EnvironmentName}"
+    DependsOn:
+      - EKSRole
+      - SecurityGroup
