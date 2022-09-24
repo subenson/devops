@@ -1,4 +1,4 @@
-Description: DevOps Demo Container Registry
+Description: DevOps Demo Kubernetes Cluster
 Parameters:
   EnvironmentName:
     Description: Name of the environment
@@ -26,43 +26,89 @@ Resources:
     Properties:
       GroupDescription: Security group for Kubernetes traffic
       GroupName: KubernetesSec
-      SecurityGroupEgress:
-        - IpProtocol: tcp
-          FromPort: 443
-          ToPort: 443
-          CidrIp: 0.0.0.0/0
-        - IpProtocol: tcp
-          FromPort: 80
-          ToPort: 80
-          CidrIp: 0.0.0.0/0
-        - IpProtocol: tcp
-          FromPort: 10250
-          ToPort: 10250
-          CidrIp: 0.0.0.0/0
-        - IpProtocol: tcp
-          FromPort: 53
-          ToPort: 53
-          CidrIp: 0.0.0.0/0
-      SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: 443
-          ToPort: 443
-          CidrIp: 0.0.0.0/0
-        - IpProtocol: tcp
-          FromPort: 80
-          ToPort: 80
-          CidrIp: 0.0.0.0/0
-        - IpProtocol: tcp
-          FromPort: 10250
-          ToPort: 10250
-          CidrIp: 0.0.0.0/0
-        - IpProtocol: tcp
-          FromPort: 53
-          ToPort: 53
-          CidrIp: 0.0.0.0/0
       VpcId:
         Fn::ImportValue:
           !Sub "${EnvironmentName}-vpc"
+  SecurityGroupIngressHttp:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      Description: Allow HTTP
+      GroupId: !Ref SecurityGroup
+      CidrIp: 0.0.0.0/0
+      IpProtocol: tcp
+      FromPort: 80
+      ToPort: 80
+    DependsOn: SecurityGroup
+  SecurityGroupIngressHttps:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      Description: Allow HTTPS
+      GroupId: !Ref SecurityGroup
+      CidrIp: 0.0.0.0/0
+      IpProtocol: tcp
+      FromPort: 443
+      ToPort: 443
+    DependsOn: SecurityGroup
+  SecurityGroupIngressKubelet:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      Description: Allow Kubelet
+      GroupId: !Ref SecurityGroup
+      CidrIp: 0.0.0.0/0
+      IpProtocol: tcp
+      FromPort: 10250
+      ToPort: 10250
+    DependsOn: SecurityGroup
+  SecurityGroupIngressDns:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      Description: Allow DNS
+      GroupId: !Ref SecurityGroup
+      CidrIp: 0.0.0.0/0
+      IpProtocol: tcp
+      FromPort: 53
+      ToPort: 53
+    DependsOn: SecurityGroup
+  SecurityGroupEgressHttp:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      Description: Allow HTTP
+      GroupId: !Ref SecurityGroup
+      CidrIp: 0.0.0.0/0
+      IpProtocol: tcp
+      FromPort: 80
+      ToPort: 80
+    DependsOn: SecurityGroup
+  SecurityGroupEgressHttps:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      Description: Allow HTTPS
+      GroupId: !Ref SecurityGroup
+      CidrIp: 0.0.0.0/0
+      IpProtocol: tcp
+      FromPort: 443
+      ToPort: 443
+    DependsOn: SecurityGroup
+  SecurityGroupEgressKubelet:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      Description: Allow Kubelet
+      GroupId: !Ref SecurityGroup
+      CidrIp: 0.0.0.0/0
+      IpProtocol: tcp
+      FromPort: 10250
+      ToPort: 10250
+    DependsOn: SecurityGroup
+  SecurityGroupEgressDns:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      Description: Allow DNS
+      GroupId: !Ref SecurityGroup
+      CidrIp: 0.0.0.0/0
+      IpProtocol: tcp
+      FromPort: 53
+      ToPort: 53
+    DependsOn: SecurityGroup
   Cluster:
     Type: AWS::EKS::Cluster
     Properties:
@@ -82,3 +128,9 @@ Resources:
     DependsOn:
       - EKSRole
       - SecurityGroup
+Outputs:
+  ClusterSecurityGroup:
+    Description: A reference to security group of the cluster
+    Value: !Ref SecurityGroup
+    Export:
+      Name: !Sub ${EnvironmentName}-cluster-sg
