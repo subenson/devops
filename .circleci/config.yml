@@ -212,7 +212,7 @@ jobs:
           name: Create registry secret
           command: |
             export ECR_PASSWORD=$(aws ecr get-login-password)
-            kubectl create secret docker-registry regcred \
+            ~/workspace/kubectl create secret docker-registry regcred \
               --docker-server=720637228989.dkr.ecr.us-east-1.amazonaws.com/devops-demo-repository:backend-bc55994 \
               --docker-username=AWS \
               --docker-password=$ECR_PASSWORD
