@@ -211,7 +211,7 @@ jobs:
       - run:
           name: Create registry secret
           command: |
-            if ! kubectl get secret | grep -q devops-demo-registry-credentials
+            if ! ~/workspace/kubectl get secret | grep -q devops-demo-registry-credentials
             then
               export ECR_PASSWORD=$(aws ecr get-login-password)
               ~/workspace/kubectl create secret docker-registry devops-demo-registry-credentials \
