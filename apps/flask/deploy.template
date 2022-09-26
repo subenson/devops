@@ -1,19 +1,19 @@
-apiVersion: apps/v1
+apiVersion: v1
 kind: Deployment
 metadata:
-  name: apps-flask-deployment
+  name: flask
   namespace: devops-demo
   labels:
-    app: apps-flask-deployment
+    app: flask
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: apps-flask-deployment
+      app: flask
   template:
     metadata:
       labels:
-        app: apps-flask-deployment
+        app: flask
     spec:
       affinity:
         nodeAffinity:
@@ -27,7 +27,7 @@ spec:
                 - arm64
       containers:
       - name: devops-demo-backend
-        image: $REGISTRY_URL/$REGISTRY_NAME:$IMAGE_NAME
+        image: $REGISTRY_URL/$REGISTRY_NAME}:$IMAGE_NAME
         ports:
         - name: http
           containerPort: 80
@@ -36,3 +36,42 @@ spec:
         kubernetes.io/os: linux
       imagePullSecrets:
       - name: devops-demo-registry-credentials
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: flask-cluster-ip
+spec:
+  type: ClusterIP
+  selector:
+    app: flask
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: flask-nodeport
+spec:
+  type: NodePort
+  selector:
+    app: flask
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: flask-loadbalancer
+spec:
+  type: LoadBalancer
+  selector:
+    app: flask
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80

@@ -227,21 +227,24 @@ jobs:
           name: Deploy
           command: |
             ~/workspace/kubectl apply -f apps/flask/deploy.yml
-          # source $BASH_ENV
-          # if ! kubectl get deploy --namespace=devops-demo | grep -q devops-demo-backend
-          # then
-          #   ~/workspace/kubectl create deploy devops-demo-backend \
-          #     --image=${REGISTRY_NAME}:backend-${CIRCLE_WORKFLOW_ID:0:7} \
-          #     --namespace=devops-demo
-          #     --port=80 \
-          #     --replicas=2
-          # else
-          #   ~/workspace/kubectl
-          # fi
-      # - persist_to_workspace:
-      #     root: ~/workspace
-      #     paths:
-      #       - kubectl
+      - run:
+          name: Expose Cluster IP
+          command: |
+            ~/workspace/kubectl expose deployment flask \
+              --type=ClusterIP \
+              --name=flask-cluster-ip
+      - run:
+          name: Expose NodePort
+          command: |
+            ~/workspace/kubectl expose deployment flask \
+              --type=NodePort \
+              --name=flask-nodeport
+      - run:
+          name: Expose LoadBalancer
+          command: |
+            ~/workspace/kubectl expose deployment flask \
+              --type=LoadBalancer \
+              --name=flask-loadbalancer
 workflows:
   default:
     jobs:

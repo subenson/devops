@@ -50,7 +50,7 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub ${EnvironmentName}-public-subnet-1
-        - Key:  !Sub kubernetes.io/cluster/${EnvironmentName}
+        - Key:  !Sub kubernetes.io/cluster/${EnvironmentName}-cluster
           Value: shared
         - Key:  kubernetes.io/role/elb
           Value: 1
@@ -117,7 +117,7 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub ${EnvironmentName}-public-subnet-2
-        - Key:  !Sub kubernetes.io/cluster/${EnvironmentName}
+        - Key:  !Sub kubernetes.io/cluster/${EnvironmentName}-cluster
           Value: shared
         - Key:  kubernetes.io/role/elb
           Value: 1
@@ -151,7 +151,7 @@ Resources:
           Value: !Sub "${EnvironmentName}-private-subnet-2"
         - Key: Project
           Value: !Ref EnvironmentName
-        - Key:  !Sub kubernetes.io/cluster/${EnvironmentName}
+        - Key:  !Sub kubernetes.io/cluster/${EnvironmentName}-cluster
           Value: shared
         - Key:  kubernetes.io/role/internal-elb
           Value: 1
