@@ -34,3 +34,5 @@ spec:
         imagePullPolicy: IfNotPresent
       nodeSelector:
         kubernetes.io/os: linux
+      imagePullSecrets:
+      - name: regcred
