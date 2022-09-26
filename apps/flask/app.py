@@ -11,4 +11,4 @@ def dev_ops_demo():
     return "DevOps Demo"
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=1123, debug=True)
+    app.run(host='0.0.0.0', port=80, debug=True)
