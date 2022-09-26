@@ -35,4 +35,4 @@ spec:
       nodeSelector:
         kubernetes.io/os: linux
       imagePullSecrets:
-      - name: regcred
+      - name: devops-demo-registry-credentials

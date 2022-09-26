@@ -211,11 +211,14 @@ jobs:
       - run:
           name: Create registry secret
           command: |
-            export ECR_PASSWORD=$(aws ecr get-login-password)
-            ~/workspace/kubectl create secret docker-registry regcred \
-              --docker-server=720637228989.dkr.ecr.us-east-1.amazonaws.com/devops-demo-repository:backend-bc55994 \
-              --docker-username=AWS \
-              --docker-password=$ECR_PASSWORD
+            if ! kubectl get secret | grep -q devops-demo-registry-credentials
+            then
+              export ECR_PASSWORD=$(aws ecr get-login-password)
+              ~/workspace/kubectl create secret docker-registry devops-demo-registry-credentials \
+                --docker-server=720637228989.dkr.ecr.us-east-1.amazonaws.com/devops-demo-repository:backend-bc55994 \
+                --docker-username=AWS \
+                --docker-password=$ECR_PASSWORD
+            fi
       - run:
           name: Deploy
           command: |
