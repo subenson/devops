@@ -41,6 +41,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: flask-cluster-ip
+  namespace: devops-demo
 spec:
   type: ClusterIP
   selector:
@@ -54,6 +55,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: flask-nodeport
+  namespace: devops-demo
 spec:
   type: NodePort
   selector:
@@ -67,6 +69,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: flask-loadbalancer
+  namespace: devops-demo
 spec:
   type: LoadBalancer
   selector:

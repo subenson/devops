@@ -233,18 +233,21 @@ jobs:
             ~/workspace/kubectl expose deployment flask \
               --type=ClusterIP \
               --name=flask-cluster-ip
+              --namespace=devops-demo
       - run:
           name: Expose NodePort
           command: |
             ~/workspace/kubectl expose deployment flask \
               --type=NodePort \
               --name=flask-nodeport
+              --namespace=devops-demo
       - run:
           name: Expose LoadBalancer
           command: |
             ~/workspace/kubectl expose deployment flask \
               --type=LoadBalancer \
               --name=flask-loadbalancer
+              --namespace=devops-demo
 workflows:
   default:
     jobs:
