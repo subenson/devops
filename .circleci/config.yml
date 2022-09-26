@@ -230,24 +230,33 @@ jobs:
       - run:
           name: Expose Cluster IP
           command: |
-            ~/workspace/kubectl expose deployment flask \
-              --type=ClusterIP \
-              --name=flask-cluster-ip
-              --namespace=devops-demo
+            if ! kubectl get service --namespace=devops-demo | grep -q flask-cluster-ip
+            then
+              ~/workspace/kubectl expose deployment flask \
+                --type=ClusterIP \
+                --name=flask-cluster-ip \
+                --namespace=devops-demo
+            fi
       - run:
           name: Expose NodePort
           command: |
-            ~/workspace/kubectl expose deployment flask \
-              --type=NodePort \
-              --name=flask-nodeport
-              --namespace=devops-demo
+            if ! kubectl get service --namespace=devops-demo | grep -q flask-nodeport
+            then
+              ~/workspace/kubectl expose deployment flask \
+                --type=NodePort \
+                --name=flask-nodeport \
+                --namespace=devops-demo
+            fi
       - run:
           name: Expose LoadBalancer
           command: |
-            ~/workspace/kubectl expose deployment flask \
-              --type=LoadBalancer \
-              --name=flask-loadbalancer
-              --namespace=devops-demo
+            if ! kubectl get service --namespace=devops-demo | grep -q flask-loadbalancer
+            then
+              ~/workspace/kubectl expose deployment flask \
+                --type=LoadBalancer \
+                --name=flask-loadbalancer \
+                --namespace=devops-demo
+            fi
 workflows:
   default:
     jobs:
