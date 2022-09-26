@@ -204,7 +204,9 @@ jobs:
             fi
       - run:
           name: Update deploy manifest image
-          command: sed -i "s/{{IMAGE}}/backend-${CIRCLE_WORKFLOW_ID:0:7}/" apps/flask/deploy.yml
+          command: |
+            export $IMAGE=${CIRCLE_WORKFLOW_ID:0:7}
+            sed -i "s/{{IMAGE}}/backend-$IMAGE/" apps/flask/deploy.yml
       - run:
           name: Deploy
           command: |
