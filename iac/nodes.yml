@@ -1,0 +1,223 @@
+Description: DevOps Demo Kubernetes Nodes
+Parameters:
+  EnvironmentName:
+    Description: Name of the environment
+    Type: String
+  AMI:
+    Description: Type of AMI
+    Type: String
+    Default: AL2_x86_64
+  ScalingMinSize:
+    Description: Minimum size of Node Group ASG
+    Type: Number
+    Default: 2
+  ScalingDesiredSize:
+    Description: Desired size of Node Group ASG
+    Type: Number
+    Default: 2
+  ScalingMaxSize:
+    Description: Max size of Node Group ASG
+    Type: Number
+    Default: 4
+Resources:
+  Role:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${EnvironmentName}-eks-nodes-role"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
+        - arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
+        - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+        - arn:aws:iam::aws:policy/AdministratorAccess
+  InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: /
+      Roles:
+        - !Ref Role
+    DependsOn: Role
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for Kubernetes nodes
+      VpcId:
+        Fn::ImportValue:
+          !Sub "${EnvironmentName}-vpc"
+      Tags:
+        - Key: !Sub
+            - 'kubernetes.io/cluster/${ClusterName}'
+            - ClusterName:
+                Fn::ImportValue:
+                  !Sub ${EnvironmentName}-cluster-name
+          Value: owned
+        - Key: Name
+          Value: !Sub "${EnvironmentName}-nodes-sg"
+  SecurityGroupIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      Description: Allow node to communicate with each other
+      GroupId: !Ref SecurityGroup
+      SourceSecurityGroupId: !Ref SecurityGroup
+      IpProtocol: '-1'
+      FromPort: 0
+      ToPort: 65535
+    DependsOn: SecurityGroup
+  SecurityGroupIngressKubernetesService:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      Description: Allow all traffic for Kubernetes service ports
+      GroupId: !Ref SecurityGroup
+      CidrIp: '0.0.0.0/0'
+      IpProtocol: tcp
+      FromPort: 30000
+      ToPort: 32767
+    DependsOn: SecurityGroup
+  SecurityGroupIngressControlPlane:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      Description: Allow kubelets and pods to receive communication from the cluster
+      GroupId: !Ref SecurityGroup
+      SourceSecurityGroupId:
+        Fn::ImportValue:
+          !Sub "${EnvironmentName}-cluster-dedicated-sg"
+      IpProtocol: tcp
+      FromPort: 1025
+      ToPort: 65535
+    DependsOn: SecurityGroup
+  SecurityGroupIngressControlPlaneHttp:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      Description: Allow HTTPS
+      GroupId: !Ref SecurityGroup
+      SourceSecurityGroupId:
+        Fn::ImportValue:
+          !Sub "${EnvironmentName}-cluster-dedicated-sg"
+      IpProtocol: tcp
+      FromPort: 80
+      ToPort: 80
+    DependsOn: SecurityGroup
+  SecurityGroupIngressControlPlaneHttps:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      Description: Allow HTTPS
+      GroupId: !Ref SecurityGroup
+      SourceSecurityGroupId:
+        Fn::ImportValue:
+          !Sub "${EnvironmentName}-cluster-dedicated-sg"
+      IpProtocol: tcp
+      FromPort: 443
+      ToPort: 443
+    DependsOn: SecurityGroup
+  ClusterControlPlaneSecurityGroupIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      Description: Allow pods to communicate with the cluster API
+      GroupId:
+        Fn::ImportValue:
+          !Sub ${EnvironmentName}-cluster-dedicated-sg
+      SourceSecurityGroupId: !Ref SecurityGroup
+      IpProtocol: tcp
+      ToPort: 443
+      FromPort: 443
+    DependsOn: SecurityGroup
+  SecurityGroupIngressNodeSSH:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      Description: Allow SSH into nodes
+      GroupId: !Ref SecurityGroup
+      SourceSecurityGroupId:
+        Fn::ImportValue:
+          !Sub ${EnvironmentName}-cluster-sg
+      IpProtocol: tcp
+      ToPort: 22
+      FromPort: 22
+    DependsOn: SecurityGroup
+  SecurityGroupEgressNode:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      Description: Allow cluster to communicate with kubelets and pods
+      GroupId:
+        Fn::ImportValue:
+          !Sub "${EnvironmentName}-cluster-sg"
+      DestinationSecurityGroupId: !Ref SecurityGroup
+      IpProtocol: tcp
+      FromPort: 1025
+      ToPort: 65535
+    DependsOn: SecurityGroup
+  SecurityGroupEgressHttp:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      Description: Allow HTTP
+      GroupId:
+        Fn::ImportValue:
+          !Sub "${EnvironmentName}-cluster-sg"
+      DestinationSecurityGroupId: !Ref SecurityGroup
+      IpProtocol: tcp
+      FromPort: 80
+      ToPort: 80
+    DependsOn: SecurityGroup
+  SecurityGroupEgressHttps:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      Description: Allow HTTPS
+      GroupId:
+        Fn::ImportValue:
+          !Sub "${EnvironmentName}-cluster-sg"
+      DestinationSecurityGroupId: !Ref SecurityGroup
+      IpProtocol: tcp
+      FromPort: 443
+      ToPort: 443
+    DependsOn: SecurityGroup
+  NodeGroup:
+    Type: AWS::EKS::Nodegroup
+    Properties:
+      AmiType: !Ref AMI
+      ClusterName:
+        Fn::ImportValue:
+          !Sub ${EnvironmentName}-cluster-name
+      DiskSize: 300
+      InstanceTypes:
+        - t3.small
+      NodeRole: !GetAtt Role.Arn
+      RemoteAccess:
+        Ec2SshKey:
+          Fn::ImportValue:
+            !Sub "${EnvironmentName}-key"
+        SourceSecurityGroups:
+          - !Ref SecurityGroup
+          - Fn::ImportValue:
+              !Sub ${EnvironmentName}-cluster-dedicated-sg
+      ScalingConfig:
+        MinSize: !Ref ScalingMinSize
+        DesiredSize: !Ref ScalingDesiredSize
+        MaxSize: !Ref ScalingMaxSize
+      Subnets:
+        - Fn::ImportValue:
+            !Sub "${EnvironmentName}-private-subnet-1"
+        - Fn::ImportValue:
+            !Sub "${EnvironmentName}-private-subnet-2"
+      Tags:
+        Name: !Sub ${EnvironmentName}-node-group
+    DependsOn:
+      - SecurityGroup
+      - Role
+      - InstanceProfile
+      - SecurityGroupIngress
+      - SecurityGroupIngressKubernetesService
+      - SecurityGroupIngressControlPlane
+      - SecurityGroupIngressControlPlaneHttp
+      - SecurityGroupIngressControlPlaneHttps
+      - ClusterControlPlaneSecurityGroupIngress
+      - SecurityGroupIngressNodeSSH
+      - SecurityGroupEgressNode
+      - SecurityGroupEgressHttp
+      - SecurityGroupEgressHttps

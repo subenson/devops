@@ -150,7 +150,19 @@ jobs:
               --stack-name DevOpsDemoCluster \
               --parameter-overrides EnvironmentName="devops-demo" \
               --capabilities "CAPABILITY_NAMED_IAM"
-
+  create-nodes:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: Configure Nodes
+          command: |
+            aws cloudformation deploy \
+              --template-file iac/nodes.yml \
+              --stack-name DevOpsDemoNodes \
+              --parameter-overrides EnvironmentName="devops-demo" \
+              --capabilities "CAPABILITY_NAMED_IAM"
 workflows:
   default:
     jobs:
@@ -162,3 +174,5 @@ workflows:
           requires: [validate-backend, upsert-container-registry]
       - upsert-cluster:
           requires: [upsert-network, containerize-backend]
+      - create-nodes:
+          requires: [upsert-cluster]
