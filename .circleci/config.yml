@@ -166,13 +166,11 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install tar and gzip
+          name: Install dependencies
           command: |
             apk add --no-cache tar
             apk add --no-cache gzip
-      - run:
-          name: Install dependencies
-          command: |
+            apk add --no-cache curl
             apk add --update python3 py3-pip
             pip install --upgrade pip
             pip install awscli
