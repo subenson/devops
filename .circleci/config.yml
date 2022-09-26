@@ -189,10 +189,6 @@ jobs:
             curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.23.6/bin/linux/amd64/kubectl
             chmod +x kubectl
             mv kubectl ~/workspace
-      - persist_to_workspace:
-          root: ~/workspace
-          paths:
-            - kubectl
       - run:
           name: Configure Kubectl
           command: |
@@ -202,9 +198,9 @@ jobs:
       - run:
           name: Upsert namespace
           command: |
-            if ! kubectl get namespace | grep -q devops-demo
+            if ! ~/workspacekubectl get namespace | grep -q devops-demo
             then
-              kubectl create namespace devops-demo
+              ~/workspacekubectl create namespace devops-demo
             fi
       - run:
           name: Update deploy manifest image
@@ -212,7 +208,7 @@ jobs:
       - run:
           name:
           command: |
-            kubectl apply -f apps/flask/deploy.yml
+            ~/workspacekubectl apply -f apps/flask/deploy.yml
           # source $BASH_ENV
           # if ! kubectl get deploy --namespace=devops-demo | grep -q devops-demo-backend
           # then
@@ -224,6 +220,10 @@ jobs:
           # else
           #   ~/workspace/kubectl
           # fi
+      # - persist_to_workspace:
+      #     root: ~/workspace
+      #     paths:
+      #       - kubectl
 workflows:
   default:
     jobs:
