@@ -198,9 +198,9 @@ jobs:
       - run:
           name: Upsert namespace
           command: |
-            if ! ~/workspacekubectl get namespace | grep -q devops-demo
+            if ! ~/workspace/kubectl get namespace | grep -q devops-demo
             then
-              ~/workspacekubectl create namespace devops-demo
+              ~/workspace/kubectl create namespace devops-demo
             fi
       - run:
           name: Update deploy manifest image
@@ -208,7 +208,7 @@ jobs:
       - run:
           name:
           command: |
-            ~/workspacekubectl apply -f apps/flask/deploy.yml
+            ~/workspace/kubectl apply -f apps/flask/deploy.yml
           # source $BASH_ENV
           # if ! kubectl get deploy --namespace=devops-demo | grep -q devops-demo-backend
           # then
