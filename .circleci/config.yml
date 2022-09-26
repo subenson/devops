@@ -207,7 +207,7 @@ jobs:
           name: Update deploy manifest image
           command: |
             export IMAGE_NAME=backend-${CIRCLE_WORKFLOW_ID:0:7}
-            envsubst < apps/flask/deploy.yml > apps/flask/deploy.yml
+            envsubst < apps/flask/deploy.template > apps/flask/deploy.yml
       - run:
           name: Deploy
           command: |
