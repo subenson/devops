@@ -166,6 +166,11 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Install tar and gzip
+          command: |
+            yum install -y tar
+            yum install -y gzip
+      - run:
           name: Get cluster name
           command: |
             export CLUSTER_NAME=$(aws eks list-clusters --query "clusters[0]" --output text)
