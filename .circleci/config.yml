@@ -204,9 +204,9 @@ jobs:
             fi
       - run:
           name: Update deploy manifest image
-          command: sed -i 's/{{IMAGE}}/backend-${CIRCLE_WORKFLOW_ID:0:7}/' apps/flask/deploy.yml
+          command: sed -i "s/{{IMAGE}}/backend-${CIRCLE_WORKFLOW_ID:0:7}/" apps/flask/deploy.yml
       - run:
-          name:
+          name: Deploy
           command: |
             ~/workspace/kubectl apply -f apps/flask/deploy.yml
           # source $BASH_ENV
