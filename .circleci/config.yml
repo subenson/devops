@@ -168,8 +168,8 @@ jobs:
       - run:
           name: Install tar and gzip
           command: |
-            sudo apt install -y tar
-            sudo apt install -y gzip
+            apk add --no-cache tar
+            apk add --no-cache gzip
       - run:
           name: Install dependencies
           command: |
