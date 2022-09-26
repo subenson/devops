@@ -206,7 +206,11 @@ jobs:
       - run:
           name: Update deploy manifest image
           command: |
+            source $BASH_ENV
             export IMAGE_NAME=backend-${CIRCLE_WORKFLOW_ID:0:7}
+            echo REGISTRY_URL
+            echo REGISTRY_NAME
+            echo IMAGE_NAME
             envsubst < apps/flask/deploy.template > apps/flask/deploy.yml
       - run:
           name: Create registry secret

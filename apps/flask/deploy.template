@@ -27,7 +27,7 @@ spec:
                 - arm64
       containers:
       - name: devops-demo-backend
-        image: $IMAGE_NAME
+        image: $REGISTRY_URL/$REGISTRY_NAME:$IMAGE_NAME
         ports:
         - name: http
           containerPort: 80
