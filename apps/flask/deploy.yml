@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: apps-flask-deployment
+  namespace: devops-demo
+  labels:
+    app: apps-flask-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: apps-flask-deployment
+  template:
+    metadata:
+      labels:
+        app: apps-flask-deployment
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/arch
+                operator: In
+                values:
+                - amd64
+                - arm64
+      containers:
+      - name: devops-demo-backend
+        image: {{IMAGE}}
+        ports:
+        - name: http
+          containerPort: 80
+        imagePullPolicy: IfNotPresent
+      nodeSelector:
+        kubernetes.io/os: linux

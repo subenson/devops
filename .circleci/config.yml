@@ -23,6 +23,12 @@ commands:
             export REGISTRY_URL=${REGISTRY_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
             echo 'export REGISTRY_URL='${REGISTRY_URL} >> "$BASH_ENV"
             echo "${REGISTRY_URL}"
+      - run:
+          name: Docker Login
+          command: |
+            export ECR_PASSWORD=$(aws ecr get-login-password)
+            source $BASH_ENV
+            docker login -u AWS -p ${ECR_PASSWORD} ${REGISTRY_URL}
 
 jobs:
   upsert-security:
@@ -114,12 +120,6 @@ jobs:
       - setup_remote_docker
       - get-container-registry
       - run:
-          name: Docker Login
-          command: |
-            export ECR_PASSWORD=$(aws ecr get-login-password)
-            source $BASH_ENV
-            docker login -u AWS -p ${ECR_PASSWORD} ${REGISTRY_URL}
-      - run:
           name: Containerize backend
           command: |
             cd apps/flask
@@ -192,9 +192,32 @@ jobs:
           command: |
             source $BASH_ENV
             aws eks update-kubeconfig --name $CLUSTER_NAME
+      - get-container-registry
       - run:
-          name: List nodes
-          command: ~/workspace/kubectl get nodes
+          name: Upsert namespace
+          command: |
+            if ! kubectl get namespace | grep -q devops-demo
+            then
+              kubectl create namespace devops-demo
+            fi
+      - run:
+          name: Update deploy manifest image
+          command: sed -i 's/{{IMAGE}}/backend-${CIRCLE_WORKFLOW_ID:0:7}/' apps/flask/deploy.yml
+      - run:
+          name:
+          command: |
+            kubectl apply -f apps/flask/deploy.yml
+          # source $BASH_ENV
+          # if ! kubectl get deploy --namespace=devops-demo | grep -q devops-demo-backend
+          # then
+          #   ~/workspace/kubectl create deploy devops-demo-backend \
+          #     --image=${REGISTRY_NAME}:backend-${CIRCLE_WORKFLOW_ID:0:7} \
+          #     --namespace=devops-demo
+          #     --port=80 \
+          #     --replicas=2
+          # else
+          #   ~/workspace/kubectl
+          # fi
 workflows:
   default:
     jobs:
