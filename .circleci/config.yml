@@ -194,7 +194,7 @@ jobs:
             aws eks update-kubeconfig --name $CLUSTER_NAME
       - run:
           name: List nodes
-          command: kubectl get nodes
+          command: ~/workspace/kubectl get nodes
 workflows:
   default:
     jobs:
