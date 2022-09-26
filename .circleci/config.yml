@@ -9,14 +9,12 @@ commands:
           command: |
             export REGISTRY_ID=$(aws ecr describe-repositories --query "repositories[0].registryId" --output text)
             echo 'export REGISTRY_ID='${REGISTRY_ID} >> "$BASH_ENV"
-            source "$BASH_ENV"
             echo "${REGISTRY_ID}"
       - run:
           name: Get repository name
           command: |
             export REGISTRY_NAME=$(aws ecr describe-repositories --query "repositories[0].repositoryName" --output text)
             echo 'export REGISTRY_NAME='${REGISTRY_NAME} >> "$BASH_ENV"
-            source "$BASH_ENV"
             echo "${REGISTRY_NAME}"
       - run:
           name: Get registry URL
@@ -24,7 +22,6 @@ commands:
             export REGISTRY_ID=$(aws ecr describe-repositories --query "repositories[0].registryId" --output text)
             export REGISTRY_URL=${REGISTRY_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
             echo 'export REGISTRY_URL='${REGISTRY_URL} >> "$BASH_ENV"
-            source "$BASH_ENV"
             echo "${REGISTRY_URL}"
 
 jobs:
@@ -163,6 +160,36 @@ jobs:
               --stack-name DevOpsDemoNodes \
               --parameter-overrides EnvironmentName="devops-demo" \
               --capabilities "CAPABILITY_NAMED_IAM"
+  deploy-application:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: Get cluster name
+          command: |
+            export CLUSTER_NAME=$(aws eks list-clusters --query "clusters[0]" --output text)
+            echo 'export CLUSTER_NAME='${CLUSTER_NAME} >> "$BASH_ENV"
+            echo "${CLUSTER_NAME}"
+      - run:
+          name: Install Kubectl
+          command: |
+            mkdir /workspace
+            curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.23.6/bin/linux/amd64/kubectl
+            chmod +x kubectl
+            mv kubectl /workspace
+      - persist_to_workspace:
+          root: workspace
+          paths:
+            - kubectl
+      - run:
+          name: Configure Kubectl
+          command: |
+            source $BASH_ENV
+            aws eks update-kubeconfig --name $CLUSTER_NAME
+      - run:
+          name: List nodes
+          command: kubectl get nodes
 workflows:
   default:
     jobs:
@@ -176,3 +203,5 @@ workflows:
           requires: [upsert-network, containerize-backend]
       - create-nodes:
           requires: [upsert-cluster]
+      - deploy-application:
+          requires: [create-nodes]
