@@ -67,7 +67,33 @@ jobs:
               --template-file iac/container-registry.yml \
               --stack-name DevOpsDemoContainerRegistry \
               --parameter-overrides EnvironmentName="devops-demo"
-  validate-backend:
+  test-backend:
+    docker:
+      - image: cimg/python:3.8
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - backend-dependencies-{{ checksum "apps/flask/requirements.txt" }}
+            - backend-dependencies-
+      - run:
+          name: Install dependencies
+          command: |
+            cd apps/flask
+            python3 -m venv venv
+            . venv/bin/activate
+            make install
+      - save_cache:
+          paths:
+            - ./venv
+          key: backend-dependencies-{{ checksum "apps/flask/requirements.txt" }}
+      - run:
+          name: Unit Test
+          command: |
+            cd apps/flask
+            . venv/bin/activate
+            pytest test.py
+  lint-backend:
     docker:
       - image: cimg/python:3.8
     steps:
@@ -93,14 +119,13 @@ jobs:
             cd apps/flask
             . venv/bin/activate
             pylint app.py
+  lint-docker:
+    docker:
+      - image: cimg/python:3.8
+    steps:
+      - checkout
       - run:
-          name: Unit Test
-          command: |
-            cd apps/flask
-            . venv/bin/activate
-            pytest test.py
-      - run:
-          name: Verify Dockerfile
+          name: Lint Dockerfile
           command: |
             cd apps/flask
             wget -O ./hadolint https://github.com/hadolint/hadolint/releases/download/v1.16.3/hadolint-Linux-x86_64
@@ -263,9 +288,11 @@ workflows:
       - upsert-security
       - upsert-network
       - upsert-container-registry
-      - validate-backend
+      - test-backend
+      - lint-backend
+      - lint-docker
       - containerize-backend:
-          requires: [validate-backend, upsert-container-registry]
+          requires: [test-backend, lint-backend, lint-docker, upsert-container-registry]
       - upsert-cluster:
           requires: [upsert-network, containerize-backend]
       - create-nodes:
