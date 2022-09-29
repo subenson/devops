@@ -155,10 +155,11 @@ jobs:
           name: Get latest container version
           command: |
             source $BASH_ENV
-            if aws ecr list-images \
+            export VERSION_EXISTS=$(aws ecr list-images \
               --repository-name=devops-demo-repository \
               --query="imageIds[?imageTag=='backend:${BACKEND_VERSION}'].imageTag" \
-              --output text
+              --output text)
+            if [ -z "$VERSION_EXISTS" ]
             then
               circleci-agent step halt
             fi
