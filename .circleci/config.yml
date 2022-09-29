@@ -131,7 +131,7 @@ jobs:
             wget -O ./hadolint https://github.com/hadolint/hadolint/releases/download/v1.16.3/hadolint-Linux-x86_64
             chmod +x ./hadolint
             ./hadolint Dockerfile
-  containerize-backend:
+  bump-backend-container-version:
     docker:
       - image: docker:20.10.18-git
     steps:
@@ -145,20 +145,38 @@ jobs:
       - setup_remote_docker
       - get-container-registry
       - run:
-          name: Containerize backend
+          name: Get backend version
           command: |
             cd apps/flask
+            export BACKEND_VERSION=$(cat version)
+            echo 'export BACKEND_VERSION='${BACKEND_VERSION} >> "$BASH_ENV"
+            echo "${BACKEND_VERSION}"
+      - run:
+          name: Get latest container version
+          command: |
+            source $BASH_ENV
+            if aws ecr list-images \
+              --repository-name=devops-demo-repository \
+              --query="imageIds[?imageTag=='backend:${BACKEND_VERSION}'].imageTag" \
+              --output text
+            then
+              circleci-agent step halt
+            fi
+      - run:
+          name: Containerize backend
+          when:
+          command: |
             docker build -t devops-demo-backend .
       - run:
           name: Tag container
           command: |
             source $BASH_ENV
-            docker tag devops-demo-backend ${REGISTRY_URL}/${REGISTRY_NAME}:backend-${CIRCLE_WORKFLOW_ID:0:7}
+            docker tag devops-demo-backend ${REGISTRY_URL}/${REGISTRY_NAME}:backend:${BACKEND_VERSION}
       - run:
           name: Push container
           command: |
             source $BASH_ENV
-            docker push ${REGISTRY_URL}/${REGISTRY_NAME}:backend-${CIRCLE_WORKFLOW_ID:0:7}
+            docker push ${REGISTRY_URL}/${REGISTRY_NAME}:backend:${BACKEND_VERSION}
   upsert-cluster:
     docker:
       - image: amazon/aws-cli
@@ -232,7 +250,7 @@ jobs:
           name: Update deploy manifest image
           command: |
             source $BASH_ENV
-            export IMAGE_NAME=backend-${CIRCLE_WORKFLOW_ID:0:7}
+            export IMAGE_NAME=backend:${BACKEND_VERSION}
             echo $REGISTRY_URL
             echo $REGISTRY_NAME
             echo $IMAGE_NAME
@@ -245,7 +263,7 @@ jobs:
             then
               export ECR_PASSWORD=$(aws ecr get-login-password)
               ~/workspace/kubectl create secret docker-registry devops-demo-registry-credentials \
-                --docker-server=${REGISTRY_URL}:backend-${CIRCLE_WORKFLOW_ID:0:7} \
+                --docker-server=${REGISTRY_URL}:backend:${BACKEND_VERSION} \
                 --docker-username=AWS \
                 --docker-password=$ECR_PASSWORD
             fi
@@ -292,10 +310,10 @@ workflows:
       - test-backend
       - lint-backend
       - lint-docker
-      - containerize-backend:
+      - bump-backend-container-version:
           requires: [test-backend, lint-backend, lint-docker, upsert-container-registry]
       - upsert-cluster:
-          requires: [upsert-network, containerize-backend]
+          requires: [upsert-network, bump-backend-container-version]
       - create-nodes:
           requires: [upsert-cluster]
       - deploy-application:
