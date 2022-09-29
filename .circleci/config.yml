@@ -168,7 +168,7 @@ jobs:
             source $BASH_ENV
             export BACKEND_CONTAINER_EXISTS=$(aws ecr list-images \
               --repository-name=devops-demo-repository \
-              --query="imageIds[?imageTag=='backend:${BACKEND_VERSION}'].imageTag" \
+              --query="imageIds[?imageTag=='backend:v${BACKEND_VERSION}'].imageTag" \
               --output text)
             echo 'export BACKEND_CONTAINER_EXISTS='${BACKEND_CONTAINER_EXISTS} >> "$BASH_ENV"
       - halt-no-new-backend-version
@@ -181,12 +181,12 @@ jobs:
           name: Tag container
           command: |
             source $BASH_ENV
-            docker tag devops-demo-backend ${REGISTRY_URL}/${REGISTRY_NAME}:backend:${BACKEND_VERSION}
+            docker tag devops-demo-backend ${REGISTRY_URL}/${REGISTRY_NAME}:backend:v${BACKEND_VERSION}
       - run:
           name: Push container
           command: |
             source $BASH_ENV
-            docker push ${REGISTRY_URL}/${REGISTRY_NAME}:backend:${BACKEND_VERSION}
+            docker push ${REGISTRY_URL}/${REGISTRY_NAME}:backend:v${BACKEND_VERSION}
   upsert-cluster:
     docker:
       - image: amazon/aws-cli
@@ -261,7 +261,7 @@ jobs:
           name: Update deploy manifest image
           command: |
             source $BASH_ENV
-            export IMAGE_NAME=backend:${BACKEND_VERSION}
+            export IMAGE_NAME=backend:v${BACKEND_VERSION}
             echo $REGISTRY_URL
             echo $REGISTRY_NAME
             echo $IMAGE_NAME
@@ -274,7 +274,7 @@ jobs:
             then
               export ECR_PASSWORD=$(aws ecr get-login-password)
               ~/workspace/kubectl create secret docker-registry devops-demo-registry-credentials \
-                --docker-server=${REGISTRY_URL}:backend:${BACKEND_VERSION} \
+                --docker-server=${REGISTRY_URL}:backend:v${BACKEND_VERSION} \
                 --docker-username=AWS \
                 --docker-password=$ECR_PASSWORD
             fi
