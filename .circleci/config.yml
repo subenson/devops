@@ -317,4 +317,4 @@ workflows:
       - upsert-nodes:
           requires: [upsert-cluster]
       - deploy-application:
-          requires: [upsert-nodes]
+          requires: [bump-backend-container-version, upsert-nodes]
