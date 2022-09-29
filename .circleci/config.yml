@@ -29,17 +29,6 @@ commands:
             export ECR_PASSWORD=$(aws ecr get-login-password)
             source $BASH_ENV
             docker login -u AWS -p ${ECR_PASSWORD} ${REGISTRY_URL}
-  halt-no-new-backend-version:
-    description: Only continue running the job if the backend version changed
-    steps:
-      - run:
-          name: Check backend changed
-          command: |
-            source $BASH_ENV
-            if [ ! -z "$BACKEND_CONTAINER_EXISTS" ]
-            then
-              circleci-agent step halt
-            fi
 
 jobs:
   upsert-security:
@@ -171,7 +160,6 @@ jobs:
               --query="imageIds[?imageTag=='backend.v${BACKEND_VERSION}'].imageTag" \
               --output text)
             echo 'export BACKEND_CONTAINER_EXISTS='${BACKEND_CONTAINER_EXISTS} >> "$BASH_ENV"
-      - halt-no-new-backend-version
       - run:
           name: Containerize backend
           command: |
@@ -230,7 +218,6 @@ jobs:
             pip install awscli
       - setup_remote_docker
       - get-container-registry
-      - halt-no-new-backend-version
       - run:
           name: Get cluster name
           command: |
