@@ -218,7 +218,6 @@ jobs:
       - image: docker:20.10.18-git
     steps:
       - checkout
-      - halt-no-new-backend-version
       - run:
           name: Install dependencies
           command: |
@@ -231,6 +230,7 @@ jobs:
             pip install awscli
       - setup_remote_docker
       - get-container-registry
+      - halt-no-new-backend-version
       - run:
           name: Get cluster name
           command: |
