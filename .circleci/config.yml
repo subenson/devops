@@ -190,7 +190,7 @@ jobs:
               --stack-name DevOpsDemoCluster \
               --parameter-overrides EnvironmentName="devops-demo" \
               --capabilities "CAPABILITY_NAMED_IAM"
-  create-nodes:
+  upsert-nodes:
     docker:
       - image: amazon/aws-cli
     steps:
@@ -306,15 +306,15 @@ workflows:
     jobs:
       - upsert-security
       - upsert-network
+      - upsert-cluster:
+          requires: [upsert-network]
       - upsert-container-registry
       - test-backend
       - lint-backend
       - lint-docker
       - bump-backend-container-version:
-          requires: [test-backend, lint-backend, lint-docker, upsert-container-registry]
-      - upsert-cluster:
-          requires: [upsert-network, bump-backend-container-version]
-      - create-nodes:
+          requires: [upsert-container-registry, test-backend, lint-backend, lint-docker]
+      - upsert-nodes:
           requires: [upsert-cluster]
       - deploy-application:
           requires: [create-nodes]
