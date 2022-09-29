@@ -147,8 +147,7 @@ jobs:
       - run:
           name: Get backend version
           command: |
-            cd apps/flask
-            export BACKEND_VERSION=$(cat version)
+            export BACKEND_VERSION=$(cat apps/flask/version)
             echo 'export BACKEND_VERSION='${BACKEND_VERSION} >> "$BASH_ENV"
             echo "${BACKEND_VERSION}"
       - run:
@@ -248,6 +247,7 @@ jobs:
           name: Update deploy manifest image
           command: |
             source $BASH_ENV
+            export BACKEND_VERSION=$(cat apps/flask/version)
             export IMAGE_NAME=backend.v${BACKEND_VERSION}
             echo $REGISTRY_URL
             echo $REGISTRY_NAME
@@ -266,7 +266,7 @@ jobs:
                 --docker-password=$ECR_PASSWORD
             fi
       - run:
-          name: Deploy
+          name: Upsert kubernetes deployment
           command: |
             ~/workspace/kubectl apply -f apps/flask/deploy.yml
       - run:
@@ -278,6 +278,8 @@ jobs:
                 --type=ClusterIP \
                 --name=flask-cluster-ip \
                 --namespace=devops-demo
+            else
+              echo "ClusterIP already exposed"
             fi
       - run:
           name: Expose NodePort
@@ -288,6 +290,8 @@ jobs:
                 --type=NodePort \
                 --name=flask-nodeport \
                 --namespace=devops-demo
+            else
+              echo "NodePort already exposed"
             fi
       - run:
           name: Expose LoadBalancer
@@ -298,6 +302,8 @@ jobs:
                 --type=LoadBalancer \
                 --name=flask-loadbalancer \
                 --namespace=devops-demo
+            else
+              echo "LoadBalancer already exposed"
             fi
 workflows:
   default:
