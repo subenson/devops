@@ -29,6 +29,16 @@ commands:
             export ECR_PASSWORD=$(aws ecr get-login-password)
             source $BASH_ENV
             docker login -u AWS -p ${ECR_PASSWORD} ${REGISTRY_URL}
+  rollback-security:
+    description: Revert security changes
+    # parameters:
+    #   workflow_id:
+    #     type: string
+    steps:
+      - run:
+          name: Revert security changes
+          when: on_fail
+          command: aws cloudformation rollback-stack --stack-name DevOpsDemoSecurity
 
 jobs:
   upsert-security:
@@ -55,6 +65,7 @@ jobs:
               --template-file iac/network.yml \
               --stack-name DevOpsDemoNetwork \
               --parameter-overrides EnvironmentName="devops-demo"
+      - rollback-security
   upsert-container-registry:
     docker:
       - image: amazon/aws-cli
