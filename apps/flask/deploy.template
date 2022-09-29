@@ -21,13 +21,6 @@ spec:
       labels:
         app: flask
     spec:
-      readinessProbe:
-      httpGet:
-        path: /
-        port: 8080
-        initialDelaySeconds: 5
-        periodSeconds: 5
-        successThreshold: 1
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -45,6 +38,13 @@ spec:
         - name: http
           containerPort: 80
         imagePullPolicy: IfNotPresent
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            successThreshold: 1
       nodeSelector:
         kubernetes.io/os: linux
       imagePullSecrets:
