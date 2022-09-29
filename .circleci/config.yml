@@ -155,18 +155,19 @@ jobs:
           name: Get latest container version
           command: |
             source $BASH_ENV
-            export VERSION_EXISTS=$(aws ecr list-images \
+            export BACKEND_CONTAINER_EXISTS=$(aws ecr list-images \
               --repository-name=devops-demo-repository \
               --query="imageIds[?imageTag=='backend:${BACKEND_VERSION}'].imageTag" \
               --output text)
-            if [ ! -z "$VERSION_EXISTS" ]
+            echo 'export BACKEND_CONTAINER_EXISTS='${BACKEND_CONTAINER_EXISTS} >> "$BASH_ENV"
+            if [ ! -z "$BACKEND_CONTAINER_EXISTS" ]
             then
               circleci-agent step halt
             fi
       - run:
           name: Containerize backend
-          when:
           command: |
+            cd apps/flask
             docker build -t devops-demo-backend .
       - run:
           name: Tag container
