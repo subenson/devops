@@ -33,13 +33,13 @@ commands:
     description: Only continue running the job if the backend version changed
     steps:
       - run:
-        name: Check backend changed
-        command: |
-          source $BASH_ENV
-          if [ ! -z "$BACKEND_CONTAINER_EXISTS" ]
-          then
-            circleci-agent step halt
-          fi
+          name: Check backend changed
+          command: |
+            source $BASH_ENV
+            if [ ! -z "$BACKEND_CONTAINER_EXISTS" ]
+            then
+              circleci-agent step halt
+            fi
 
 jobs:
   upsert-security:
