@@ -317,4 +317,4 @@ workflows:
       - upsert-nodes:
           requires: [upsert-cluster]
       - deploy-application:
-          requires: [create-nodes]
+          requires: [upsert-nodes]
