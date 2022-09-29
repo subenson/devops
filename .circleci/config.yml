@@ -159,7 +159,7 @@ jobs:
               --repository-name=devops-demo-repository \
               --query="imageIds[?imageTag=='backend:${BACKEND_VERSION}'].imageTag" \
               --output text)
-            if [ -z "$VERSION_EXISTS" ]
+            if [ ! -z "$VERSION_EXISTS" ]
             then
               circleci-agent step halt
             fi
