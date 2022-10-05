@@ -186,7 +186,7 @@ Resources:
           !Sub ${EnvironmentName}-cluster-name
       DiskSize: 300
       InstanceTypes:
-        - t3.small
+        - t3.micro
       NodeRole: !GetAtt Role.Arn
       RemoteAccess:
         Ec2SshKey:
