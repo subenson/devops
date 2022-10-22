@@ -84,14 +84,12 @@ metadata:
   name: flask-loadbalancer
   namespace: devops-demo
   annotations:
-    service.beta.kubernetes.io/aws-load-balancer-type: external
-    service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
-    service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+    service.beta.kubernetes.io/aws-load-balancer-internal: "true"
 spec:
   type: LoadBalancer
   selector:
     app: flask
   ports:
     - name: http
-      protocol: TCP
       port: 80
+      targetPort: 80
