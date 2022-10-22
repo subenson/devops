@@ -257,13 +257,15 @@ jobs:
           name: Create registry secret
           command: |
             source $BASH_ENV
-            if ! ~/workspace/kubectl get secret | grep -q devops-demo-registry-credentials
+            if ! ~/workspace/kubectl get secret --namespace=devops-demo --cloud-provider=aws | grep -q devops-demo-registry-credentials
             then
               export ECR_PASSWORD=$(aws ecr get-login-password)
               ~/workspace/kubectl create secret docker-registry devops-demo-registry-credentials \
                 --docker-server=${REGISTRY_URL}:backend.v${BACKEND_VERSION} \
                 --docker-username=AWS \
                 --docker-password=$ECR_PASSWORD
+                --namespace=devops-demo
+                --cloud-provider=aws
             fi
       - run:
           name: Upsert kubernetes deployment
@@ -272,36 +274,39 @@ jobs:
       - run:
           name: Expose Cluster IP
           command: |
-            if ! ~/workspace/kubectl get service --namespace=devops-demo | grep -q flask-cluster-ip
+            if ! ~/workspace/kubectl get service --namespace=devops-demo --cloud-provider=aws | grep -q flask-cluster-ip
             then
               ~/workspace/kubectl expose deployment flask \
                 --type=ClusterIP \
                 --name=flask-cluster-ip \
                 --namespace=devops-demo
+                --cloud-provider=aws
             else
               echo "ClusterIP already exposed"
             fi
       - run:
           name: Expose NodePort
           command: |
-            if ! ~/workspace/kubectl get service --namespace=devops-demo | grep -q flask-nodeport
+            if ! ~/workspace/kubectl get service --namespace=devops-demo --cloud-provider=aws | grep -q flask-nodeport
             then
               ~/workspace/kubectl expose deployment flask \
                 --type=NodePort \
                 --name=flask-nodeport \
                 --namespace=devops-demo
+                --cloud-provider=aws
             else
               echo "NodePort already exposed"
             fi
       - run:
           name: Expose LoadBalancer
           command: |
-            if ! ~/workspace/kubectl get service --namespace=devops-demo | grep -q flask-loadbalancer
+            if ! ~/workspace/kubectl get service --namespace=devops-demo --cloud-provider=aws | grep -q flask-loadbalancer
             then
               ~/workspace/kubectl expose deployment flask \
                 --type=LoadBalancer \
                 --name=flask-loadbalancer \
                 --namespace=devops-demo
+                --cloud-provider=aws
             else
               echo "LoadBalancer already exposed"
             fi
