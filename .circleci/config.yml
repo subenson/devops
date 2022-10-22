@@ -257,14 +257,13 @@ jobs:
           name: Create registry secret
           command: |
             source $BASH_ENV
-            if ! ~/workspace/kubectl get secret --namespace=devops-demo | grep -q devops-demo-registry-credentials
+            if ! ~/workspace/kubectl get secret | grep -q devops-demo-registry-credentials
             then
               export ECR_PASSWORD=$(aws ecr get-login-password)
               ~/workspace/kubectl create secret docker-registry devops-demo-registry-credentials \
                 --docker-server=${REGISTRY_URL}:backend.v${BACKEND_VERSION} \
                 --docker-username=AWS \
                 --docker-password=$ECR_PASSWORD
-                --namespace=devops-demo
             fi
       - run:
           name: Upsert kubernetes deployment
