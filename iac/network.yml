@@ -64,6 +64,9 @@ Resources:
     DependsOn: InternetGatewayAttachment
     Properties:
       Domain: vpc
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-ngw-1-eip
   NatGateway1:
     Type: AWS::EC2::NatGateway
     Properties:
@@ -131,6 +134,9 @@ Resources:
     DependsOn: InternetGatewayAttachment
     Properties:
       Domain: vpc
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-ngw-2-eip
   NatGateway2:
     Type: AWS::EC2::NatGateway
     Properties:

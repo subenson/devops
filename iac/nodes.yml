@@ -141,6 +141,15 @@ Resources:
       ToPort: 22
       FromPort: 22
     DependsOn: SecurityGroup
+  SecurityGroupIngressHttp:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      Description: Allow HTTP into nodes
+      GroupId: !Ref SecurityGroup
+      IpProtocol: tcp
+      FromPort: 80
+      ToPort: 80
+      CidrIp: 0.0.0.0/0
   SecurityGroupEgressNode:
     Type: AWS::EC2::SecurityGroupEgress
     Properties:
