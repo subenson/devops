@@ -269,42 +269,6 @@ jobs:
           name: Upsert kubernetes deployment
           command: |
             ~/workspace/kubectl apply -f apps/flask/deploy.yml
-      - run:
-          name: Expose Cluster IP
-          command: |
-            if ! ~/workspace/kubectl get service --namespace=devops-demo | grep -q flask-cluster-ip
-            then
-              ~/workspace/kubectl expose deployment flask \
-                --type=ClusterIP \
-                --name=flask-cluster-ip \
-                --namespace=devops-demo
-            else
-              echo "ClusterIP already exposed"
-            fi
-      - run:
-          name: Expose NodePort
-          command: |
-            if ! ~/workspace/kubectl get service --namespace=devops-demo | grep -q flask-nodeport
-            then
-              ~/workspace/kubectl expose deployment flask \
-                --type=NodePort \
-                --name=flask-nodeport \
-                --namespace=devops-demo
-            else
-              echo "NodePort already exposed"
-            fi
-      - run:
-          name: Expose LoadBalancer
-          command: |
-            if ! ~/workspace/kubectl get service --namespace=devops-demo | grep -q flask-loadbalancer
-            then
-              ~/workspace/kubectl expose deployment flask \
-                --type=LoadBalancer \
-                --name=flask-loadbalancer \
-                --namespace=devops-demo
-            else
-              echo "LoadBalancer already exposed"
-            fi
 workflows:
   default:
     jobs:
