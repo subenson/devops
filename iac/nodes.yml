@@ -227,6 +227,7 @@ Resources:
       - SecurityGroupIngressControlPlaneHttps
       - ClusterControlPlaneSecurityGroupIngress
       - SecurityGroupIngressNodeSSH
+      - SecurityGroupIngressHttp
       - SecurityGroupEgressNode
       - SecurityGroupEgressHttp
       - SecurityGroupEgressHttps
