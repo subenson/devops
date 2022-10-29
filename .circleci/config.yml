@@ -239,3 +239,5 @@ workflows:
       - lint-docker
       - bump-backend-container-version:
           requires: [upsert-container-registry, test-backend, lint-backend, lint-docker]
+      - deploy-backend:
+          requires: [upsert-cluster, bump-backend-container-version]
