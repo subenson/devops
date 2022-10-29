@@ -40,11 +40,9 @@ spec:
   externalTrafficPolicy: Cluster
   ports:
   - port: 80
+    nodePort: 1235
     targetPort: 80
     protocol: TCP
     name: http
-  - port: 443
-    protocol: TCP
-    name: https
   selector:
     run: flask
