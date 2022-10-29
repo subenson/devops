@@ -230,10 +230,10 @@ jobs:
           name: Create registry secret
           command: |
             source $BASH_ENV
-            if ! ~/workspace/kubectl get secret | grep -q devops-demo-registry-credentials
+            if ! ~/kubectl get secret | grep -q devops-demo-registry-credentials
             then
               export ECR_PASSWORD=$(aws ecr get-login-password)
-              ~/workspace/kubectl create secret docker-registry devops-demo-registry-credentials \
+              ~/kubectl create secret docker-registry devops-demo-registry-credentials \
                 --docker-server=${REGISTRY_URL}:backend.v${BACKEND_VERSION} \
                 --docker-username=AWS \
                 --docker-password=$ECR_PASSWORD
@@ -241,7 +241,7 @@ jobs:
       - run:
           name: Upsert kubernetes deployment
           command: |
-            ~/workspace/kubectl apply -f apps/flask/deploy.yml
+            ~/kubectl apply -f apps/flask/deploy.yml
       - run:
           name: Port forward
           command: |
