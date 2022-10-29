@@ -180,12 +180,15 @@ jobs:
       - run:
           name: Create Cluster
           command: |
-            ~/eksctl create cluster \
-              --name=devops-demo \
-              --nodes=2 \
-              --node-type=t3.micro \
-              --region=${AWS_DEFAULT_REGION} \
-              --instance-prefix=devops-demo-
+            if ! ~/eksctl get cluster | grep -q devops-demo
+            then
+              ~/eksctl create cluster \
+                --name=devops-demo \
+                --nodes=2 \
+                --node-type=t3.micro \
+                --region=${AWS_DEFAULT_REGION} \
+                --instance-prefix=devops-demo-
+            fi
   deploy-backend:
     docker:
       - image: docker:20.10.18-git
