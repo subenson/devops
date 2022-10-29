@@ -23,6 +23,9 @@ spec:
       containers:
       - name: devops-demo-backend
         image: $REGISTRY_URL/$REGISTRY_NAME:$IMAGE_NAME
+        ports:
+        - containerPort: 443
+        - containerPort: 80
       imagePullSecrets:
       - name: devops-demo-registry-credentials
 ---
