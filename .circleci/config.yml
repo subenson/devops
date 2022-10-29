@@ -176,11 +176,11 @@ jobs:
           name: Install EKSCTL
           command: |
             curl --silent --location "https://github.com/weaveworks/eksctl/releases/download/v0.116.0/eksctl_Linux_amd64.tar.gz" | tar xz -C /tmp
-            sudo mv /tmp/eksctl /usr/local/bin
+            mv /tmp/eksctl ~/
       - run:
           name: Create Cluster
           command: |
-            /usr/local/bin/eksctl create cluster \
+            ~/eksctl create cluster \
               --name=devops-demo \
               --nodes=2 \
               --node-type=t3.micro \
