@@ -5,7 +5,7 @@ metadata:
   labels:
     app: flask
 spec:
-  replicas: 4
+  replicas: 3
   selector:
     matchLabels:
       app: flask
@@ -33,7 +33,11 @@ metadata:
   labels:
     run: flask
 spec:
+  type: NodePort
   ports:
+  - port: 8080
+    targetPort: 80
+    protocol: TCP
   - port: 80
     protocol: TCP
   selector:
