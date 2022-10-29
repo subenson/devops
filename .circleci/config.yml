@@ -215,8 +215,7 @@ jobs:
       - run:
           name: Configure Kubectl
           command: |
-            source $BASH_ENV
-            aws eks update-kubeconfig --name $CLUSTER_NAME
+            aws eks update-kubeconfig --name devops-demo
       - run:
           name: Deploy application
           command: |
