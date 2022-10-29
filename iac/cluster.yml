@@ -37,9 +37,9 @@ Resources:
           - !Ref SecurityGroup
         SubnetIds:
           - Fn::ImportValue:
-              !Sub "${EnvironmentName}-private-subnet-1"
+              !Sub "${EnvironmentName}-public-subnet-1"
           - Fn::ImportValue:
-              !Sub "${EnvironmentName}-private-subnet-2"
+              !Sub "${EnvironmentName}-public-subnet-2"
       RoleArn: !GetAtt EKSRole.Arn
       Tags:
         - Key: Project
