@@ -37,7 +37,12 @@ metadata:
     run: flask
 spec:
   type: LoadBalancer
+  externalTrafficPolicy: Cluster
   ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+    name: http
   - port: 8080
     targetPort: 80
     protocol: TCP
