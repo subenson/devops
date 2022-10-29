@@ -211,9 +211,9 @@ Resources:
         MaxSize: !Ref ScalingMaxSize
       Subnets:
         - Fn::ImportValue:
-            !Sub "${EnvironmentName}-private-subnet-1"
+            !Sub "${EnvironmentName}-public-subnet-1"
         - Fn::ImportValue:
-            !Sub "${EnvironmentName}-private-subnet-2"
+            !Sub "${EnvironmentName}-public-subnet-2"
       Tags:
         Name: !Sub ${EnvironmentName}-node-group
     DependsOn:
