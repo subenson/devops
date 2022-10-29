@@ -242,13 +242,6 @@ jobs:
           name: Upsert kubernetes deployment
           command: |
             ~/kubectl apply -f apps/flask/deploy.yml
-      - run:
-          name: Port forward
-          command: |
-            ~/kubectl get pod -o name | grep flask | while read -r line ; do
-                echo "Processing $line"
-                ~/kubectl port-forward $line --address 0.0.0.0 80:80
-            done
 workflows:
   default:
     jobs:
