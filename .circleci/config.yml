@@ -200,6 +200,7 @@ jobs:
             apk add --no-cache tar
             apk add --no-cache gzip
             apk add --no-cache curl
+            apk add gettext libintl
             apk add --update python3 py3-pip
             pip install --upgrade pip
             pip install awscli
@@ -216,11 +217,31 @@ jobs:
           command: |
             aws eks update-kubeconfig --name devops-demo
       - run:
-          name: Deploy application
+          name: Update deploy manifest image
           command: |
             source $BASH_ENV
-            echo "${REGISTRY_URL}/${REGISTRY_NAME}:backend.v${BACKEND_VERSION}"
-            ~/kubectl create deploy devops-demo-backend --image=${REGISTRY_URL}/${REGISTRY_NAME}:backend.v${BACKEND_VERSION}
+            export BACKEND_VERSION=$(cat apps/flask/version)
+            export IMAGE_NAME=backend.v${BACKEND_VERSION}
+            echo $REGISTRY_URL
+            echo $REGISTRY_NAME
+            echo $IMAGE_NAME
+            envsubst < apps/flask/deploy.template > apps/flask/deploy.yml
+      - run:
+          name: Create registry secret
+          command: |
+            source $BASH_ENV
+            if ! ~/workspace/kubectl get secret | grep -q devops-demo-registry-credentials
+            then
+              export ECR_PASSWORD=$(aws ecr get-login-password)
+              ~/workspace/kubectl create secret docker-registry devops-demo-registry-credentials \
+                --docker-server=${REGISTRY_URL}:backend.v${BACKEND_VERSION} \
+                --docker-username=AWS \
+                --docker-password=$ECR_PASSWORD
+            fi
+      - run:
+          name: Upsert kubernetes deployment
+          command: |
+            ~/workspace/kubectl apply -f apps/flask/deploy.yml
       - run:
           name: Port forward
           command: |
