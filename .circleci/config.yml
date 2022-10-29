@@ -219,8 +219,13 @@ jobs:
           name: Deploy application
           command: |
             source $BASH_ENV
+            echo "${REGISTRY_URL}/${REGISTRY_NAME}:backend.v${BACKEND_VERSION}"
             ~/kubectl create deploy devops-demo-backend --image=${REGISTRY_URL}/${REGISTRY_NAME}:backend.v${BACKEND_VERSION}
-
+      - run:
+          name: Port forward
+          command: |
+            export POD=$(~/kubectl get pod -o name)
+            ~/kubectl port-forward pod/${POD} --address 0.0.0.0 80:80
 workflows:
   default:
     jobs:
