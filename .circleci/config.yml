@@ -164,22 +164,18 @@ jobs:
             docker push ${REGISTRY_URL}/${REGISTRY_NAME}:backend.v${BACKEND_VERSION}
   upsert-cluster:
     docker:
-      - image: docker:20.10.18-git
+      - image: amazon/aws-cli
     steps:
       - checkout
       - run:
           name: Install dependencies
           command: |
-            apk add --no-cache tar
-            apk add --no-cache gzip
-            apk add --no-cache curl
-            apk add --update python3 py3-pip
-            pip install --upgrade pip
-            pip install awscli
+            yum install -y tar
+            yum install -y gzip
       - run:
           name: Install EKSCTL
           command: |
-            curl --silent --location "https://github.com/weaveworks/eksctl/releases/download/latest_release/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+            curl --silent --location "https://github.com/weaveworks/eksctl/releases/download/v0.116.0/eksctl_Linux_amd64.tar.gz" | tar xz -C /tmp
             sudo mv /tmp/eksctl /usr/local/bin
       - run:
           name: Create Cluster
