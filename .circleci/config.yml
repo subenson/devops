@@ -200,6 +200,8 @@ jobs:
             apk add --update python3 py3-pip
             pip install --upgrade pip
             pip install awscli
+      - setup_remote_docker
+      - get-container-registry
       - run:
           name: Install Kubectl
           command: |
