@@ -164,14 +164,18 @@ jobs:
             docker push ${REGISTRY_URL}/${REGISTRY_NAME}:backend.v${BACKEND_VERSION}
   upsert-cluster:
     docker:
-      - image: amazon/aws-cli
+      - image: docker:20.10.18-git
     steps:
       - checkout
       - run:
           name: Install dependencies
           command: |
-            yum install -y tar
-            yum install -y gzip
+            apk add --no-cache tar
+            apk add --no-cache gzip
+            apk add --no-cache curl
+            apk add --update python3 py3-pip
+            pip install --upgrade pip
+            pip install awscli
       - run:
           name: Install EKSCTL
           command: |
@@ -197,7 +201,6 @@ jobs:
             apk add --no-cache tar
             apk add --no-cache gzip
             apk add --no-cache curl
-            apk add gettext libintl
             apk add --update python3 py3-pip
             pip install --upgrade pip
             pip install awscli
