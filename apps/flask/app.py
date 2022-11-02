@@ -9,7 +9,7 @@ app = Flask(__name__)
 def dev_ops_demo():
     """Index route."""
     version = "1.0"
-    with open("version", "r") as version_file:
+    with open("version", encoding="utf-8") as version_file:
         version = version_file.read()
 
     return f"DevOps Demo {version}"
