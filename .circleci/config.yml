@@ -242,6 +242,23 @@ jobs:
           name: Upsert kubernetes deployment
           command: |
             ~/kubectl apply -f apps/flask/deploy.yml
+  e2e-test:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: Curl Load Balancer
+          command: |
+            export LOAD_BALANCER=$(aws elb describe-load-balancers --query "LoadBalancerDescriptions[0].DNSName" --output text)
+            export BACKEND_VERSION=$(cat apps/flask/version)
+            export RESPONSE=$(curl -s $LOAD_BALANCER)
+            echo $RESPONSE
+            if ! echo $RESPONSE | grep -q "${BACKEND_VERSION}"
+            then
+              exit 1
+            fi
+
 workflows:
   default:
     jobs:
@@ -255,3 +272,5 @@ workflows:
           requires: [upsert-container-registry, test-backend, lint-backend, lint-docker]
       - deploy-backend:
           requires: [upsert-cluster, bump-backend-container-version]
+      - e2e-test:
+          required: [deploy-backend]
