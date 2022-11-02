@@ -5,23 +5,14 @@ metadata:
   labels:
     app: flask
 spec:
-  replicas: 3
+  replicas: 2
   selector:
     matchLabels:
       app: flask
-  minReadySeconds: 5
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 0
-  readinessProbe:
-    periodSeconds: 5
-    timeoutSeconds: 2
-    successThreshold: 2
-    httpGet:
-      path: /
-      port: 1235
+      maxUnavailable: 50%
   template:
     metadata:
       labels:
