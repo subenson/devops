@@ -7,6 +7,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def dev_ops_demo():
+    """Index route."""
     return "DevOps Demo v1.1"
 
 if __name__ == "__main__":
