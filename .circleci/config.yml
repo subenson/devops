@@ -43,18 +43,6 @@ jobs:
               --template-file iac/security.yml \
               --stack-name DevOpsDemoSecurity \
               --parameter-overrides EnvironmentName="devops-demo"
-  upsert-network:
-    docker:
-      - image: amazon/aws-cli
-    steps:
-      - checkout
-      - run:
-          name: Setup network
-          command: |
-            aws cloudformation deploy \
-              --template-file iac/network.yml \
-              --stack-name DevOpsDemoNetwork \
-              --parameter-overrides EnvironmentName="devops-demo"
   upsert-container-registry:
     docker:
       - image: amazon/aws-cli
@@ -180,27 +168,28 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Upsert cluster
+          name: Install dependencies
           command: |
-            aws cloudformation deploy \
-              --template-file iac/cluster.yml \
-              --stack-name DevOpsDemoCluster \
-              --parameter-overrides EnvironmentName="devops-demo" \
-              --capabilities "CAPABILITY_NAMED_IAM"
-  upsert-nodes:
-    docker:
-      - image: amazon/aws-cli
-    steps:
-      - checkout
+            yum install -y tar
+            yum install -y gzip
       - run:
-          name: Configure Nodes
+          name: Install EKSCTL
           command: |
-            aws cloudformation deploy \
-              --template-file iac/nodes.yml \
-              --stack-name DevOpsDemoNodes \
-              --parameter-overrides EnvironmentName="devops-demo" \
-              --capabilities "CAPABILITY_NAMED_IAM"
-  deploy-application:
+            curl --silent --location "https://github.com/weaveworks/eksctl/releases/download/v0.116.0/eksctl_Linux_amd64.tar.gz" | tar xz -C /tmp
+            mv /tmp/eksctl ~/
+      - run:
+          name: Create Cluster
+          command: |
+            if ! ~/eksctl get cluster | grep -q devops-demo
+            then
+              ~/eksctl create cluster \
+                --name=devops-demo \
+                --nodes=2 \
+                --node-type=t3.micro \
+                --region=${AWS_DEFAULT_REGION} \
+                --instance-prefix=devops-demo-
+            fi
+  deploy-backend:
     docker:
       - image: docker:20.10.18-git
     steps:
@@ -218,31 +207,15 @@ jobs:
       - setup_remote_docker
       - get-container-registry
       - run:
-          name: Get cluster name
-          command: |
-            export CLUSTER_NAME=$(aws eks list-clusters --query "clusters[0]" --output text)
-            echo 'export CLUSTER_NAME='${CLUSTER_NAME} >> "$BASH_ENV"
-            echo "${CLUSTER_NAME}"
-      - run:
           name: Install Kubectl
           command: |
-            mkdir ~/workspace
             curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.23.6/bin/linux/amd64/kubectl
             chmod +x kubectl
-            mv kubectl ~/workspace
+            mv kubectl ~/
       - run:
           name: Configure Kubectl
           command: |
-            source $BASH_ENV
-            aws eks update-kubeconfig --name $CLUSTER_NAME
-      - get-container-registry
-      - run:
-          name: Upsert namespace
-          command: |
-            if ! ~/workspace/kubectl get namespace | grep -q devops-demo
-            then
-              ~/workspace/kubectl create namespace devops-demo
-            fi
+            aws eks update-kubeconfig --name devops-demo
       - run:
           name: Update deploy manifest image
           command: |
@@ -257,10 +230,10 @@ jobs:
           name: Create registry secret
           command: |
             source $BASH_ENV
-            if ! ~/workspace/kubectl get secret | grep -q devops-demo-registry-credentials
+            if ! ~/kubectl get secret | grep -q devops-demo-registry-credentials
             then
               export ECR_PASSWORD=$(aws ecr get-login-password)
-              ~/workspace/kubectl create secret docker-registry devops-demo-registry-credentials \
+              ~/kubectl create secret docker-registry devops-demo-registry-credentials \
                 --docker-server=${REGISTRY_URL}:backend.v${BACKEND_VERSION} \
                 --docker-username=AWS \
                 --docker-password=$ECR_PASSWORD
@@ -268,21 +241,17 @@ jobs:
       - run:
           name: Upsert kubernetes deployment
           command: |
-            ~/workspace/kubectl apply -f apps/flask/deploy.yml
+            ~/kubectl apply -f apps/flask/deploy.yml
 workflows:
   default:
     jobs:
       - upsert-security
-      - upsert-network
-      - upsert-cluster:
-          requires: [upsert-network]
+      - upsert-cluster
       - upsert-container-registry
       - test-backend
       - lint-backend
       - lint-docker
       - bump-backend-container-version:
           requires: [upsert-container-registry, test-backend, lint-backend, lint-docker]
-      - upsert-nodes:
-          requires: [upsert-cluster]
-      - deploy-application:
-          requires: [bump-backend-container-version, upsert-nodes]
+      - deploy-backend:
+          requires: [upsert-cluster, bump-backend-container-version]
