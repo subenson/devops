@@ -40,8 +40,7 @@ spec:
   externalTrafficPolicy: Cluster
   ports:
   - port: 80
-    nodePort: 1235
-    targetPort: 80
+    targetPort: 1235
     protocol: TCP
     name: http
   selector:
