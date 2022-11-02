@@ -273,4 +273,4 @@ workflows:
       - deploy-backend:
           requires: [upsert-cluster, bump-backend-container-version]
       - e2e-test:
-          required: [deploy-backend]
+          requires: [deploy-backend]
